@@ -56,7 +56,7 @@ export default function Home() {
 
   // APIからデータを取得する
   // パラメータにlimitを設定し、20件取得する
-  const [url, setUrl] = useState('https://pokeapi.co/api/v2/pokemon?limit=20');
+  const [url, setUrl] = useState('https://pokeapi.co/api/v2/pokemon?limit=500');
 
   const getAllPokemons = async () => {
     setIsLoading(true);
@@ -73,33 +73,40 @@ export default function Home() {
 
   const createPokemonObject = async (results: []) => {
     const pokemonPromises = results.map(async (pokemon: Pokemon) => {
-      const pokemonUrl = `https://pokeapi.co/api/v2/pokemon/${pokemon.name}`;
-      const response = await axios.get(pokemonUrl);
-      const data = response.data;
+      try {
+        const pokemonUrl = `https://pokeapi.co/api/v2/pokemon/${pokemon.name}`;
+        const response = await axios.get(pokemonUrl);
+        const data = response.data;
 
-      const speciesResponse = await axios.get(data.species?.url);
-      const japaneseName = speciesResponse.data.names.find((name: NameEntry) => name.language.name === 'ja')?.name;
-      const japaneseFlavorText = speciesResponse.data.flavor_text_entries.find(
-        (entry: FlavorTextEntry) => entry.language.name === 'ja',
-      )?.flavor_text;
+        if (data.species && data.species.url) {
+          const speciesResponse = await axios.get(data.species.url);
+          const japaneseName = speciesResponse.data.names.find((name: NameEntry) => name.language.name === 'ja')?.name;
+          const japaneseFlavorText = speciesResponse.data.flavor_text_entries.find(
+            (entry: FlavorTextEntry) => entry.language.name === 'ja',
+          )?.flavor_text;
 
-      const _image = data.sprites.other['official-artwork'].front_default;
-      const _iconImage = data.sprites.other.dream_world.front_default;
-      const _type = data.types[0].type.name;
-      // 複数のtypeを配列として取得
-      const _types = data.types.map((typeInfo: { type: { name: string } }) => typeInfo.type.name);
-      const _japaneseTypes = _types.map((type: string) => typeTranslations[type] || type);
+          const _image = data.sprites.other['official-artwork'].front_default;
+          const _iconImage = data.sprites.other.dream_world.front_default;
+          const _type = data.types[0].type.name;
+          // 複数のtypeを配列として取得
+          const _types = data.types.map((typeInfo: { type: { name: string } }) => typeInfo.type.name);
+          const _japaneseTypes = _types.map((type: string) => typeTranslations[type] || type);
 
-      return {
-        id: data.id,
-        name: japaneseName || data.name,
-        iconImage: _iconImage,
-        image: _image,
-        type: _type,
-        types: _types,
-        japaneseTypes: _japaneseTypes,
-        description: japaneseFlavorText || 'Description not available',
-      };
+          return {
+            id: data.id,
+            name: japaneseName || data.name,
+            iconImage: _iconImage,
+            image: _image,
+            type: _type,
+            types: _types,
+            japaneseTypes: _japaneseTypes,
+            description: japaneseFlavorText || 'Description not available',
+          };
+        }
+      } catch (error) {
+        console.error(`Error fetching data for ${pokemon.name}:`, error);
+      }
+      return null;
     });
 
     const newPokemons = (await Promise.all(pokemonPromises)).filter((pokemon) => pokemon !== null);
