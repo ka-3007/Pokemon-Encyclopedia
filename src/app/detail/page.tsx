@@ -2,32 +2,40 @@
 
 import PokemonDetail from '@/components/PokemonDetail';
 import { PokemonModel } from '@/model/pokemon';
+import { getFromIndexedDB } from '@/repository/indexDB';
 import { PokemonRepo } from '@/repository/pokemon';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function Detail() {
   const searchParams = useSearchParams();
-  const id = searchParams.get('id');
+  const name = searchParams.get('name');
 
-  const [pokemons, setPokemons] = useState<PokemonModel[]>();
+  const [pokemon, setPokemon] = useState<PokemonModel>();
 
   useEffect(() => {
-    if (id) {
+    if (name) {
       (async function () {
         try {
-          const pokemons = await PokemonRepo.pokemonDetailQuery(Number(id));
-          setPokemons(pokemons);
+          // IndexedDBからポケモンデータを取得しようとする
+          const cachedPokemon = await getFromIndexedDB(name);
+          if (cachedPokemon) {
+            // IndexedDBにデータが存在する場合、それを使用する
+            setPokemon(cachedPokemon);
+          } else {
+            const pokemon = await PokemonRepo.getPokemonDetail(name);
+            setPokemon(pokemon);
+          }
         } catch (error: any) {
           console.error(error);
         }
       })();
     }
-  }, [id]);
+  }, [name]);
 
   return (
     <div className="p-16 bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen font-sans flex items-center justify-center">
-      {pokemons?.map((pokemon) => (
+      {pokemon && (
         <PokemonDetail
           id={pokemon.id}
           name={pokemon.japaneseName}
@@ -39,7 +47,7 @@ export default function Detail() {
           weight={pokemon.weight}
           key={pokemon.id}
         />
-      ))}
+      )}
     </div>
   );
 }

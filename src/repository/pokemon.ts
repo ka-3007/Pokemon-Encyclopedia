@@ -3,6 +3,7 @@ import {
   DocumentReference,
   collection,
   doc,
+  getDoc,
   getDocs,
   limit,
   query,
@@ -29,13 +30,23 @@ class PokemonRepository {
     return collection(db, 'pokemons') as CollectionReference<PokemonModel>;
   }
 
-  // ポケモンリストクエリ関数
-  async pokemonDetailQuery(id: number) {
-    const q = query(this.pokemonColRef(), where('id', '==', id), limit(1));
-    const querySnapshot = await getDocs(q);
-    const pokemon = querySnapshot.docs.map((doc) => doc.data());
+  // // ポケモンリストクエリ関数
+  // async pokemonDetailQuery(id: number) {
+  //   const q = query(this.pokemonColRef(), where('id', '==', id), limit(1));
+  //   const querySnapshot = await getDocs(q);
+  //   const pokemon = querySnapshot.docs.map((doc) => doc.data());
 
-    return pokemon;
+  //   return pokemon;
+  // }
+
+  async getPokemonDetail(name: string) {
+    // Firebaseからポケモンデータを取得しようとする
+    const pokemonDoc = await getDoc(PokemonRepo.pokemonDocRef(name));
+    if (pokemonDoc.exists()) {
+      // Firebaseにデータが存在する場合、それを使用する
+      const data = pokemonDoc.data() as PokemonModel;
+      return data;
+    }
   }
 }
 
