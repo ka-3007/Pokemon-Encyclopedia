@@ -5,6 +5,7 @@ import { PokemonRepo } from '@/repository/pokemon';
 import { typeTranslations } from '@/utils/typeTranslations';
 import axios from 'axios';
 import { getDoc, setDoc } from 'firebase/firestore';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 interface NameEntry {
@@ -172,17 +173,17 @@ export default function Home() {
       <h1>ポケモン図鑑</h1>
       <div className="pokemon-container">
         <div className="all-container">
-          {allPokemons.map((pokemon, index) => (
-            <PokemonThumbnails
-              id={pokemon.id}
-              name={pokemon.japaneseName}
-              image={pokemon.image}
-              iconImage={pokemon.iconImage}
-              japaneseTypes={pokemon.japaneseTypes}
-              description={pokemon.description}
-              types={pokemon.types}
-              key={index}
-            />
+          {allPokemons.map((pokemon) => (
+            <Link key={pokemon.id} href={`/detail?id=${pokemon.id}`}>
+              <PokemonThumbnails
+                id={pokemon.id}
+                name={pokemon.japaneseName}
+                image={pokemon.image}
+                iconImage={pokemon.iconImage}
+                japaneseTypes={pokemon.japaneseTypes}
+                types={pokemon.types}
+              />
+            </Link>
           ))}
         </div>
         {isLoading ? (

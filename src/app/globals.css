@@ -181,10 +181,6 @@ h3 {
   display: block;
 }
 
-.thumb-container small {
-  /* text-transform: capitalize; */
-}
-
 .detail-wrapper {
   display: flex;
   flex-direction: column;
