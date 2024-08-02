@@ -21,22 +21,21 @@ interface FlavorTextEntry {
   flavor_text: string;
 }
 
-// 公式アートワーク
-// ドリームワールドアイコン（オリジナル）
-// ホーム版アイコン
-// デフォルトの前面スプライト
-// 世代VIII以降のアイコン
 const getImage = (data: any) => {
   if (data.sprites.other['official-artwork'].front_default) {
+    // 公式アートワーク
     return data.sprites.other['official-artwork'].front_default;
   } else if (data.sprites.other.dream_world.front_default) {
+    // ドリームワールドのフロントデフォルト画像
     return data.sprites.other.dream_world.front_default;
   } else if (data.sprites.other.home.front_default) {
+    // ホームバージョンのフロントデフォルト画像
     return data.sprites.other.home.front_default;
   } else if (data.sprites.front_default) {
+    // 通常のフロントデフォルト画像
     return data.sprites.front_default;
   } else if (data.sprites.other['official-artwork'].front_shiny) {
-    // 色違いの公式アートワーク（通常のアートワークがない場合のフォールバック）
+    // 公式アートワークのフロントシャイニー画像
     return data.sprites.other['official-artwork'].front_shiny;
   } else {
     // すべてのオプションが利用できない場合のデフォルト画像
@@ -44,22 +43,21 @@ const getImage = (data: any) => {
   }
 };
 
-// ドリームワールドアイコン（オリジナル）
-// 公式アートワーク
-// ホーム版アイコン
-// デフォルトの前面スプライト
-// 世代VIII以降のアイコン
 const getIconImage = (data: any) => {
   if (data.sprites.other.dream_world.front_default) {
+    // ドリームワールドのフロントデフォルト画像
     return data.sprites.other.dream_world.front_default;
   } else if (data.sprites.other['official-artwork'].front_default) {
+    // 公式アートワーク
     return data.sprites.other['official-artwork'].front_default;
   } else if (data.sprites.other.home.front_default) {
+    // ホームバージョンのフロントデフォルト画像
     return data.sprites.other.home.front_default;
   } else if (data.sprites.front_default) {
+    // 通常のフロントデフォルト画像
     return data.sprites.front_default;
   } else if (data.sprites.other['official-artwork'].front_shiny) {
-    // 色違いの公式アートワーク（通常のアートワークがない場合のフォールバック）
+    // 公式アートワークのフロントシャイニー画像
     return data.sprites.other['official-artwork'].front_shiny;
   } else {
     // すべてのオプションが利用できない場合のデフォルト画像
@@ -87,6 +85,8 @@ export default function Home() {
         // 次のページのURLをセット
         setUrl(data.next);
       }
+    } catch (error) {
+      console.error('Error fetching Pokémon data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -136,6 +136,8 @@ export default function Home() {
               image: _image, // 画像URL
               types: _types, // タイプの配列
               japaneseTypes: _japaneseTypes, // 日本語のタイプの配列
+              height: data.height / 10,
+              weight: data.weight / 10,
               description: japaneseFlavorText || 'Description not available', // 日本語の説明文
             };
             // ポケモンデータをFirebaseに保存

@@ -6,5 +6,7 @@ export type PokemonModel = {
   iconImage: string;
   types: string[];
   japaneseTypes: string[];
+  height: number;
+  weight: number;
   description: string;
 };
