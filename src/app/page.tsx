@@ -1,18 +1,10 @@
 'use client';
 import PokemonThumbnails from '@/components/PokemonThumbnails';
+import { PokemonModel } from '@/model/pokemon';
+import { PokemonRepo } from '@/repository/pokemon';
 import axios from 'axios';
+import { getDoc, setDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-
-export type Pokemon = {
-  id: number;
-  name: string;
-  image: string;
-  iconImage: string;
-  type: string;
-  types: string[];
-  japaneseTypes: string[];
-  description: string;
-};
 
 interface NameEntry {
   language: {
@@ -52,11 +44,11 @@ const typeTranslations: { [key: string]: string } = {
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
-  const [allPokemons, setAllPokemons] = useState<Pokemon[]>([]);
+  const [allPokemons, setAllPokemons] = useState<PokemonModel[]>([]);
 
   // APIからデータを取得する
   // パラメータにlimitを設定し、20件取得する
-  const [url, setUrl] = useState('https://pokeapi.co/api/v2/pokemon?limit=500');
+  const [url, setUrl] = useState('https://pokeapi.co/api/v2/pokemon?limit=50');
 
   const getAllPokemons = async () => {
     setIsLoading(true);
@@ -72,36 +64,48 @@ export default function Home() {
   };
 
   const createPokemonObject = async (results: []) => {
-    const pokemonPromises = results.map(async (pokemon: Pokemon) => {
+    const pokemonPromises = results.map(async (pokemon: PokemonModel) => {
       try {
-        const pokemonUrl = `https://pokeapi.co/api/v2/pokemon/${pokemon.name}`;
-        const response = await axios.get(pokemonUrl);
-        const data = response.data;
+        // Firebaseからポケモンデータを取得しようとする
+        const pokemonDoc = await getDoc(PokemonRepo.pokemonDocRef(pokemon.name));
 
-        if (data.species && data.species.url) {
-          const speciesResponse = await axios.get(data.species.url);
-          const japaneseName = speciesResponse.data.names.find((name: NameEntry) => name.language.name === 'ja')?.name;
-          const japaneseFlavorText = speciesResponse.data.flavor_text_entries.find(
-            (entry: FlavorTextEntry) => entry.language.name === 'ja',
-          )?.flavor_text;
+        if (pokemonDoc.exists()) {
+          // Firebaseにデータが存在する場合、それを使用する
+          return pokemonDoc.data();
+        } else {
+          const pokemonUrl = `https://pokeapi.co/api/v2/pokemon/${pokemon.name}`;
+          const response = await axios.get(pokemonUrl);
+          const data = response.data;
 
-          const _image = data.sprites.other['official-artwork'].front_default;
-          const _iconImage = data.sprites.other.dream_world.front_default;
-          const _type = data.types[0].type.name;
-          // 複数のtypeを配列として取得
-          const _types = data.types.map((typeInfo: { type: { name: string } }) => typeInfo.type.name);
-          const _japaneseTypes = _types.map((type: string) => typeTranslations[type] || type);
+          if (data.species && data.species.url) {
+            const speciesResponse = await axios.get(data.species.url);
+            const japaneseName = speciesResponse.data.names.find(
+              (name: NameEntry) => name.language.name === 'ja',
+            )?.name;
+            const japaneseFlavorText = speciesResponse.data.flavor_text_entries.find(
+              (entry: FlavorTextEntry) => entry.language.name === 'ja',
+            )?.flavor_text;
 
-          return {
-            id: data.id,
-            name: japaneseName || data.name,
-            iconImage: _iconImage,
-            image: _image,
-            type: _type,
-            types: _types,
-            japaneseTypes: _japaneseTypes,
-            description: japaneseFlavorText || 'Description not available',
-          };
+            const _image = data.sprites.other['official-artwork'].front_default;
+            const _iconImage = data.sprites.other.dream_world.front_default;
+            // 複数のtypeを配列として取得
+            const _types = data.types.map((typeInfo: { type: { name: string } }) => typeInfo.type.name);
+            const _japaneseTypes = _types.map((type: string) => typeTranslations[type] || type);
+
+            const pokemonData: PokemonModel = {
+              id: data.id,
+              name: japaneseName || data.name,
+              iconImage: _iconImage,
+              image: _image,
+              types: _types,
+              japaneseTypes: _japaneseTypes,
+              description: japaneseFlavorText || 'Description not available',
+            };
+            // ポケモンデータをFirebaseに保存
+            await setDoc(PokemonRepo.pokemonDocRef(pokemon.name), pokemonData);
+
+            return pokemonData;
+          }
         }
       } catch (error) {
         console.error(`Error fetching data for ${pokemon.name}:`, error);
@@ -109,8 +113,12 @@ export default function Home() {
       return null;
     });
 
-    const newPokemons = (await Promise.all(pokemonPromises)).filter((pokemon) => pokemon !== null);
-    setAllPokemons((currentList) => [...currentList, ...newPokemons].sort((a, b) => a.id - b.id));
+    try {
+      const newPokemons = (await Promise.all(pokemonPromises)).filter((pokemon) => pokemon !== null);
+      setAllPokemons((currentList) => [...currentList, ...newPokemons].sort((a, b) => a.id - b.id));
+    } catch (error) {
+      console.error('Error processing pokemon promises:', error);
+    }
   };
 
   useEffect(() => {
@@ -129,9 +137,9 @@ export default function Home() {
               name={pokemon.name}
               image={pokemon.image}
               iconImage={pokemon.iconImage}
-              type={pokemon.type}
               japaneseTypes={pokemon.japaneseTypes}
               description={pokemon.description}
+              types={pokemon.types}
               key={index}
             />
           ))}
