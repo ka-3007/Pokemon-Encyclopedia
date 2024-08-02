@@ -6,17 +6,20 @@ type Props = {
   name: string;
   image: string;
   iconImage: string;
-  type: string;
   japaneseTypes: string[];
   description: string;
+  types: string[];
 };
 
 // アロー関数でコンポーネントを定義
-const PokemonThumbnails = ({ id, name, image, iconImage, type, japaneseTypes, description }: Props) => {
-  const style = `thumb-container ${type}`;
+const PokemonThumbnails = ({ id, name, image, iconImage, japaneseTypes, description, types }: Props) => {
+  const backgroundStyle =
+    types.length > 1
+      ? { background: `linear-gradient(135deg, var(--${types[0]}) 50%, var(--${types[1]}) 50%)` }
+      : { background: `var(--${types[0]})` };
 
   return (
-    <div className={style}>
+    <div className="thumb-container" style={backgroundStyle}>
       <div className="number">
         <small>#0{id}</small>
       </div>
