@@ -2,6 +2,7 @@
 import PokemonThumbnails from '@/components/PokemonThumbnails';
 import { PokemonModel } from '@/model/pokemon';
 import { PokemonRepo } from '@/repository/pokemon';
+import { typeTranslations } from '@/utils/typeTranslations';
 import axios from 'axios';
 import { getDoc, setDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
@@ -20,26 +21,50 @@ interface FlavorTextEntry {
   flavor_text: string;
 }
 
-// タイプの英語名と日本語名のマッピング
-const typeTranslations: { [key: string]: string } = {
-  normal: 'ノーマル',
-  fire: 'ほのお',
-  water: 'みず',
-  electric: 'でんき',
-  grass: 'くさ',
-  ice: 'こおり',
-  fighting: 'かくとう',
-  poison: 'どく',
-  ground: 'じめん',
-  flying: 'ひこう',
-  psychic: 'エスパー',
-  bug: 'むし',
-  rock: 'いわ',
-  ghost: 'ゴースト',
-  dragon: 'ドラゴン',
-  dark: 'あく',
-  steel: 'はがね',
-  fairy: 'フェアリー',
+// 公式アートワーク
+// ドリームワールドアイコン（オリジナル）
+// ホーム版アイコン
+// デフォルトの前面スプライト
+// 世代VIII以降のアイコン
+const getImage = (data: any) => {
+  if (data.sprites.other['official-artwork'].front_default) {
+    return data.sprites.other['official-artwork'].front_default;
+  } else if (data.sprites.other.dream_world.front_default) {
+    return data.sprites.other.dream_world.front_default;
+  } else if (data.sprites.other.home.front_default) {
+    return data.sprites.other.home.front_default;
+  } else if (data.sprites.front_default) {
+    return data.sprites.front_default;
+  } else if (data.sprites.other['official-artwork'].front_shiny) {
+    // 色違いの公式アートワーク（通常のアートワークがない場合のフォールバック）
+    return data.sprites.other['official-artwork'].front_shiny;
+  } else {
+    // すべてのオプションが利用できない場合のデフォルト画像
+    return '/pokemon_ball.svg';
+  }
+};
+
+// ドリームワールドアイコン（オリジナル）
+// 公式アートワーク
+// ホーム版アイコン
+// デフォルトの前面スプライト
+// 世代VIII以降のアイコン
+const getIconImage = (data: any) => {
+  if (data.sprites.other.dream_world.front_default) {
+    return data.sprites.other.dream_world.front_default;
+  } else if (data.sprites.other['official-artwork'].front_default) {
+    return data.sprites.other['official-artwork'].front_default;
+  } else if (data.sprites.other.home.front_default) {
+    return data.sprites.other.home.front_default;
+  } else if (data.sprites.front_default) {
+    return data.sprites.front_default;
+  } else if (data.sprites.other['official-artwork'].front_shiny) {
+    // 色違いの公式アートワーク（通常のアートワークがない場合のフォールバック）
+    return data.sprites.other['official-artwork'].front_shiny;
+  } else {
+    // すべてのオプションが利用できない場合のデフォルト画像
+    return '/pokemon_ball.svg';
+  }
 };
 
 export default function Home() {
@@ -53,11 +78,15 @@ export default function Home() {
   const getAllPokemons = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(url);
-      const data = response.data;
-      await createPokemonObject(data.results);
-      // 次の20件をURLにセットする
-      setUrl(data.next);
+      if (url) {
+        // 指定されたURLからポケモンデータを取得
+        const response = await axios.get(url);
+        const data = response.data;
+        // ポケモンオブジェクトを作成する関数を呼び出し、データの結果を渡す
+        await createPokemonObject(data.results);
+        // 次のページのURLをセット
+        setUrl(data.next);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -73,33 +102,41 @@ export default function Home() {
           // Firebaseにデータが存在する場合、それを使用する
           return pokemonDoc.data();
         } else {
+          // ポケモンAPIからポケモンのデータを取得するためのURLを設定
           const pokemonUrl = `https://pokeapi.co/api/v2/pokemon/${pokemon.name}`;
+          // ポケモンデータをAPIから取得
           const response = await axios.get(pokemonUrl);
           const data = response.data;
-
+          // ポケモンの詳細情報（species）のURLが存在する場合
           if (data.species && data.species.url) {
+            // 詳細情報を取得するためにAPIリクエストを送信
             const speciesResponse = await axios.get(data.species.url);
+            // 日本語の名前を取得
             const japaneseName = speciesResponse.data.names.find(
               (name: NameEntry) => name.language.name === 'ja',
             )?.name;
+            // 日本語の説明文を取得
             const japaneseFlavorText = speciesResponse.data.flavor_text_entries.find(
               (entry: FlavorTextEntry) => entry.language.name === 'ja',
             )?.flavor_text;
-
-            const _image = data.sprites.other['official-artwork'].front_default;
-            const _iconImage = data.sprites.other.dream_world.front_default;
-            // 複数のtypeを配列として取得
+            // 画像URLを取得するためのカスタム関数を呼び出し
+            const _image = getImage(data);
+            // アイコン画像URLを取得するためのカスタム関数を呼び出し
+            const _iconImage = getIconImage(data);
+            // ポケモンのタイプを配列として取得
             const _types = data.types.map((typeInfo: { type: { name: string } }) => typeInfo.type.name);
+            // タイプの日本語翻訳を取得
             const _japaneseTypes = _types.map((type: string) => typeTranslations[type] || type);
-
+            // ポケモンデータのオブジェクトを作成
             const pokemonData: PokemonModel = {
-              id: data.id,
-              name: japaneseName || data.name,
-              iconImage: _iconImage,
-              image: _image,
-              types: _types,
-              japaneseTypes: _japaneseTypes,
-              description: japaneseFlavorText || 'Description not available',
+              id: data.id, // ポケモンのID
+              name: data.name, // ポケモンの英語名
+              japaneseName, // ポケモンの日本語名
+              iconImage: _iconImage, // アイコン画像URL
+              image: _image, // 画像URL
+              types: _types, // タイプの配列
+              japaneseTypes: _japaneseTypes, // 日本語のタイプの配列
+              description: japaneseFlavorText || 'Description not available', // 日本語の説明文
             };
             // ポケモンデータをFirebaseに保存
             await setDoc(PokemonRepo.pokemonDocRef(pokemon.name), pokemonData);
@@ -114,7 +151,9 @@ export default function Home() {
     });
 
     try {
+      // すべてのポケモンのプロミスが解決するのを待ち、その結果を取得
       const newPokemons = (await Promise.all(pokemonPromises)).filter((pokemon) => pokemon !== null);
+      // 現在のポケモンリストを更新する
       setAllPokemons((currentList) => [...currentList, ...newPokemons].sort((a, b) => a.id - b.id));
     } catch (error) {
       console.error('Error processing pokemon promises:', error);
@@ -134,7 +173,7 @@ export default function Home() {
           {allPokemons.map((pokemon, index) => (
             <PokemonThumbnails
               id={pokemon.id}
-              name={pokemon.name}
+              name={pokemon.japaneseName}
               image={pokemon.image}
               iconImage={pokemon.iconImage}
               japaneseTypes={pokemon.japaneseTypes}
