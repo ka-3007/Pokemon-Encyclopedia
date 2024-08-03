@@ -146,8 +146,7 @@ h4 {
 .load-more {
   display: flex;
   justify-content: center;
-  padding: 0.5rem 1.5rem;
-  margin-top: 1rem;
+  margin-top: 2.5rem;
   min-width: 50%;
   padding: 0.5rem 1rem;
   background-color: #3b82f6;
