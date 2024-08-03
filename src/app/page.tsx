@@ -47,7 +47,7 @@ export default function Home() {
   if (allPokemons.length === 0 || !displayPokémon) return;
 
   return (
-    <div className="bg-gradient-to-br from-blue-100 to-purple-100">
+    <div className="bg-gradient-to-br from-blue-100 to-purple-100 pb-10">
       <Search
         selectedType={selectedType}
         setSelectedType={setSelectedType}

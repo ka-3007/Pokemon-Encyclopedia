@@ -21,7 +21,7 @@ const PokemonDetail = ({ id, name, image, japaneseTypes, description, types, hei
       : { background: `var(--${types[0]})` };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 p-4 font-sans">
+    <div className="bg-gradient-to-br from-blue-100 to-purple-100 p-4 font-sans">
       <div
         className="flex flex-col md:flex-row w-full max-w-5xl mx-auto rounded-lg overflow-hidden shadow-lg"
         style={backgroundStyle}

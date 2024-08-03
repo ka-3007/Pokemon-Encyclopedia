@@ -32,7 +32,7 @@ export function DetailContent() {
   }, [name]);
 
   return (
-    <div className="p-16 bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen font-sans flex items-center justify-center">
+    <div className="bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen flex flex-col items-center justify-center">
       {pokemon && (
         <PokemonDetail
           id={pokemon.id}
