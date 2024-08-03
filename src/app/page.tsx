@@ -1,5 +1,6 @@
 'use client';
 import PokemonThumbnails from '@/components/PokemonThumbnails';
+import Search from '@/components/Search';
 import { PokemonModel } from '@/model/pokemon';
 import { getFromIndexedDB, saveToIndexedDB } from '@/repository/indexDB';
 import { PokemonRepo } from '@/repository/pokemon';
@@ -69,7 +70,14 @@ const getIconImage = (data: any) => {
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
+  // すべてのポケモンデータを格納するステート。アプリ全体で使用される。
   const [allPokemons, setAllPokemons] = useState<PokemonModel[]>([]);
+  // ユーザーが選択したポケモンのタイプを管理するステート。フィルター機能に使用。
+  const [selectedType, setSelectedType] = useState<string>();
+  // ユーザーが入力した検索キーワードを管理するステート。検索機能に使用。
+  const [searchInput, setSearchInput] = useState('');
+  // フィルタリングされたポケモンデータを格納するステート。表示するデータを管理。
+  const [filterPokemons, setFilterPokemons] = useState<PokemonModel[]>();
 
   // APIからデータを取得する
   // パラメータにlimitを設定し、20件取得する
@@ -181,32 +189,63 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const onSearch = async () => {
+    const filterPokemonList = await PokemonRepo.pokemonFilterQuery(searchInput, selectedType);
+    setFilterPokemons(filterPokemonList);
+  };
+
+  const onReset = async () => {
+    setFilterPokemons(undefined);
+    setSearchInput('');
+    setSelectedType('');
+  };
+
   return (
-    <div className="app-container">
-      <h1>ポケモン図鑑</h1>
-      <div className="pokemon-container">
-        <div className="all-container">
-          {allPokemons.map((pokemon) => (
-            <Link key={pokemon.id} href={`/detail?name=${pokemon.name}`}>
-              <PokemonThumbnails
-                id={pokemon.id}
-                name={pokemon.japaneseName}
-                image={pokemon.image}
-                iconImage={pokemon.iconImage}
-                japaneseTypes={pokemon.japaneseTypes}
-                types={pokemon.types}
-              />
-            </Link>
-          ))}
+    <>
+      <Search selectedType={selectedType} setSelectedType={setSelectedType} onSearch={onSearch} onReset={onReset} />
+      <div className="app-container">
+        <div className="pokemon-container">
+          <div className="all-container">
+            {!filterPokemons ? (
+              <>
+                {allPokemons.map((pokemon) => (
+                  <Link key={pokemon.id} href={`/detail?name=${pokemon.name}`}>
+                    <PokemonThumbnails
+                      id={pokemon.id}
+                      name={pokemon.japaneseName}
+                      image={pokemon.image}
+                      iconImage={pokemon.iconImage}
+                      japaneseTypes={pokemon.japaneseTypes}
+                      types={pokemon.types}
+                    />
+                  </Link>
+                ))}
+              </>
+            ) : (
+              filterPokemons.map((pokemon) => (
+                <Link key={pokemon.id} href={`/detail?name=${pokemon.name}`}>
+                  <PokemonThumbnails
+                    id={pokemon.id}
+                    name={pokemon.japaneseName}
+                    image={pokemon.image}
+                    iconImage={pokemon.iconImage}
+                    japaneseTypes={pokemon.japaneseTypes}
+                    types={pokemon.types}
+                  />
+                </Link>
+              ))
+            )}
+          </div>
+          {!filterPokemons &&
+            (isLoading ? (
+              <div className="load-more">読み込み中...</div>
+            ) : (
+              <button className="load-more" onClick={getAllPokemons}>
+                もっとみる！
+              </button>
+            ))}
         </div>
-        {isLoading ? (
-          <div className="load-more">now loading...</div>
-        ) : (
-          <button className="load-more" onClick={getAllPokemons}>
-            もっとみる！
-          </button>
-        )}
       </div>
-    </div>
+    </>
   );
 }

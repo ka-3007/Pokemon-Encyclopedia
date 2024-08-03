@@ -113,6 +113,13 @@ code {
   padding: 3rem 0.5rem;
 }
 
+/* PC向けのパディングを設定するためのメディアクエリ */
+@media (min-width: 768px) {
+  .app-container {
+    padding: 1rem 5rem 3rem 5rem; /* PC向けのパディング */
+  }
+}
+
 .pokemon-container {
   display: flex;
   flex-direction: column;
