@@ -1,12 +1,13 @@
 import {
   CollectionReference,
+  DocumentData,
   DocumentReference,
+  Query,
   collection,
   doc,
   endAt,
   getDoc,
   getDocs,
-  limit,
   orderBy,
   query,
   startAt,
@@ -33,39 +34,35 @@ class PokemonRepository {
     return collection(db, 'pokemons') as CollectionReference<PokemonModel>;
   }
 
-  // // ポケモンリストクエリ関数
-  // async pokemonDetailQuery(type: string) {
-  //   const q = query(this.pokemonColRef(), where('japaneseTypes', 'array-contains', type), orderBy('id', 'asc'));
-  //   const querySnapshot = await getDocs(q);
-  //   const pokemon = querySnapshot.docs.map((doc) => doc.data());
-
-  //   return pokemon;
-  // }
-
   async pokemonFilterQuery(name: string, type?: string) {
     const convertHiraganaToKatakana = (str: string) => {
       return str.replace(/[\u3041-\u3096]/g, (ch) => {
         return String.fromCharCode(ch.charCodeAt(0) + 0x60);
       });
     };
-    // ひらがなをカタカナに変換
-    const katakanaPrefix = convertHiraganaToKatakana(name);
+    let q: Query<PokemonModel, DocumentData>;
     // 基本のクエリを作成
-    let q = query(
-      this.pokemonColRef(),
-      orderBy('japaneseName'),
-      startAt(katakanaPrefix),
-      endAt(katakanaPrefix + '\uf8ff'),
-    );
-    // type が指定されている場合、追加の条件をクエリに追加
+    q = query(this.pokemonColRef());
+
+    if (name) {
+      // ひらがなをカタカナに変換
+      const katakanaPrefix = convertHiraganaToKatakana(name);
+      // 基本のクエリを作成
+      q = query(q, orderBy('japaneseName'), startAt(katakanaPrefix), endAt(katakanaPrefix + '\uf8ff'));
+    }
+
     if (type) {
       q = query(q, where('japaneseTypes', 'array-contains', type));
     }
-    const querySnapshot = await getDocs(q);
-    const pokemon = querySnapshot.docs.map((doc) => doc.data()).sort((a, b) => a.id - b.id);
-    console.log(pokemon);
 
-    return pokemon;
+    if (name || type) {
+      const querySnapshot = await getDocs(q);
+      const pokemon = querySnapshot.docs.map((doc) => doc.data()).sort((a, b) => a.id - b.id);
+
+      return pokemon;
+    }
+
+    return [];
   }
 
   async getPokemonDetail(name: string) {

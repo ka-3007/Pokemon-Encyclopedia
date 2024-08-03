@@ -5,7 +5,7 @@ import { PokemonModel } from '@/model/pokemon';
 import { allPokemonsState } from '@/recoil/atom';
 import { PokemonRepo } from '@/repository/pokemon';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { useGetAllPokemons } from './hooks/useGetAllPokemons';
 
@@ -16,59 +16,59 @@ export default function Home() {
   const [selectedType, setSelectedType] = useState<string>();
   // ユーザーが入力した検索キーワードを管理するステート。検索機能に使用。
   const [searchInput, setSearchInput] = useState('');
-  // フィルタリングされたポケモンデータを格納するステート。表示するデータを管理。
-  const [filterPokemons, setFilterPokemons] = useState<PokemonModel[]>();
+  //検索中かどうかを管理するステート
+  const [isSearch, setIsSearch] = useState(false);
+  //表示するポケモンを管理するステート
+  const [displayPokémon, setDisplayPokémon] = useState<PokemonModel[]>();
+
+  useEffect(() => {
+    setDisplayPokémon(allPokemons);
+  }, [allPokemons]);
 
   const onSearch = async () => {
-    const filterPokemonList = await PokemonRepo.pokemonFilterQuery(searchInput, selectedType);
-    setFilterPokemons(filterPokemonList);
+    if (!searchInput && selectedType) {
+      const filterPokemonList = await PokemonRepo.pokemonFilterQuery(searchInput, selectedType);
+      setDisplayPokémon(filterPokemonList);
+      setIsSearch(true);
+    }
   };
 
   const onReset = async () => {
-    setFilterPokemons(undefined);
+    setDisplayPokémon(allPokemons);
     setSearchInput('');
     setSelectedType('');
+    setIsSearch(false);
   };
 
-  if (allPokemons.length === 0) return;
+  if (allPokemons.length === 0 || !displayPokémon) return;
 
   return (
     <>
-      <Search selectedType={selectedType} setSelectedType={setSelectedType} onSearch={onSearch} onReset={onReset} />
+      <Search
+        selectedType={selectedType}
+        setSelectedType={setSelectedType}
+        searchInput={searchInput}
+        setSearchInput={setSearchInput}
+        onSearch={onSearch}
+        onReset={onReset}
+      />
       <div className="app-container">
         <div className="pokemon-container">
           <div className="all-container">
-            {!filterPokemons ? (
-              <>
-                {allPokemons.map((pokemon) => (
-                  <Link key={pokemon.id} href={`/detail?name=${pokemon.name}`}>
-                    <PokemonThumbnails
-                      id={pokemon.id}
-                      name={pokemon.japaneseName}
-                      image={pokemon.image}
-                      iconImage={pokemon.iconImage}
-                      japaneseTypes={pokemon.japaneseTypes}
-                      types={pokemon.types}
-                    />
-                  </Link>
-                ))}
-              </>
-            ) : (
-              filterPokemons.map((pokemon) => (
-                <Link key={pokemon.id} href={`/detail?name=${pokemon.name}`}>
-                  <PokemonThumbnails
-                    id={pokemon.id}
-                    name={pokemon.japaneseName}
-                    image={pokemon.image}
-                    iconImage={pokemon.iconImage}
-                    japaneseTypes={pokemon.japaneseTypes}
-                    types={pokemon.types}
-                  />
-                </Link>
-              ))
-            )}
+            {displayPokémon.map((pokemon) => (
+              <Link key={pokemon.id} href={`/detail?name=${pokemon.name}`}>
+                <PokemonThumbnails
+                  id={pokemon.id}
+                  name={pokemon.japaneseName}
+                  image={pokemon.image}
+                  iconImage={pokemon.iconImage}
+                  japaneseTypes={pokemon.japaneseTypes}
+                  types={pokemon.types}
+                />
+              </Link>
+            ))}
           </div>
-          {!filterPokemons &&
+          {!isSearch &&
             (isLoading ? (
               <div className="load-more">読み込み中...</div>
             ) : (
