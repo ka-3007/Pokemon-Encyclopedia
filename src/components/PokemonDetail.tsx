@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
 type Props = {
@@ -15,6 +16,7 @@ type Props = {
 };
 
 const PokemonDetail = ({ id, name, image, japaneseTypes, description, types, height, weight }: Props) => {
+  const router = useRouter();
   const backgroundStyle =
     types.length > 1
       ? { background: `linear-gradient(135deg, var(--${types[0]}) 50%, var(--${types[1]}) 50%)` }
@@ -51,10 +53,10 @@ const PokemonDetail = ({ id, name, image, japaneseTypes, description, types, hei
         </div>
       </div>
       <button className="mt-4 flex items-center text-blue-500 hover:text-blue-700">
-        <Link href="/" className="flex items-center text-blue-600 hover:text-blue-800">
+        <button onClick={router.back} className="flex items-center text-blue-600 hover:text-blue-800">
           <ChevronLeft size={20} />
           <span className="ml-1">戻る</span>
-        </Link>
+        </button>
       </button>
     </div>
   );
