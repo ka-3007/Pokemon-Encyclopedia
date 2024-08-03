@@ -41,7 +41,6 @@ code {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  padding: 3rem 0.5rem;
 }
 
 /* PC向けのパディングを設定するためのメディアクエリ */
