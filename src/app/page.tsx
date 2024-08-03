@@ -59,7 +59,7 @@ export default function Home() {
       <div className="app-container">
         <div className="pokemon-container">
           <div className="all-container">
-            {displayPokémon.map((pokemon) => (
+            {Array.from(new Map(displayPokémon.map((pokemon) => [pokemon.id, pokemon])).values()).map((pokemon) => (
               <Link key={pokemon.id} href={`/detail?name=${pokemon.name}`}>
                 <PokemonThumbnails
                   id={pokemon.id}
