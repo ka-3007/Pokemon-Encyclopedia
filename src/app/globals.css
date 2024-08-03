@@ -169,3 +169,12 @@ h4 {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
   border-radius: 0.375rem;
 }
+
+@media (max-width: 768px) {
+  .mobile-img {
+    padding-bottom: 0;
+  }
+  .mobile-description {
+    padding-top: 0;
+  }
+}
