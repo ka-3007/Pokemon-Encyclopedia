@@ -24,50 +24,6 @@ interface FlavorTextEntry {
   flavor_text: string;
 }
 
-const getImage = (data: any) => {
-  if (data.sprites.other['official-artwork'].front_default) {
-    // 公式アートワーク
-    return data.sprites.other['official-artwork'].front_default;
-  } else if (data.sprites.other.dream_world.front_default) {
-    // ドリームワールドのフロントデフォルト画像
-    return data.sprites.other.dream_world.front_default;
-  } else if (data.sprites.other.home.front_default) {
-    // ホームバージョンのフロントデフォルト画像
-    return data.sprites.other.home.front_default;
-  } else if (data.sprites.front_default) {
-    // 通常のフロントデフォルト画像
-    return data.sprites.front_default;
-  } else if (data.sprites.other['official-artwork'].front_shiny) {
-    // 公式アートワークのフロントシャイニー画像
-    return data.sprites.other['official-artwork'].front_shiny;
-  } else {
-    // すべてのオプションが利用できない場合のデフォルト画像
-    return '/pokemon_ball.svg';
-  }
-};
-
-const getIconImage = (data: any) => {
-  if (data.sprites.other.dream_world.front_default) {
-    // ドリームワールドのフロントデフォルト画像
-    return data.sprites.other.dream_world.front_default;
-  } else if (data.sprites.other['official-artwork'].front_default) {
-    // 公式アートワーク
-    return data.sprites.other['official-artwork'].front_default;
-  } else if (data.sprites.other.home.front_default) {
-    // ホームバージョンのフロントデフォルト画像
-    return data.sprites.other.home.front_default;
-  } else if (data.sprites.front_default) {
-    // 通常のフロントデフォルト画像
-    return data.sprites.front_default;
-  } else if (data.sprites.other['official-artwork'].front_shiny) {
-    // 公式アートワークのフロントシャイニー画像
-    return data.sprites.other['official-artwork'].front_shiny;
-  } else {
-    // すべてのオプションが利用できない場合のデフォルト画像
-    return '/pokemon_ball.svg';
-  }
-};
-
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   // すべてのポケモンデータを格納するステート。アプリ全体で使用される。
@@ -139,9 +95,15 @@ export default function Home() {
                 (entry: FlavorTextEntry) => entry.language.name === 'ja',
               )?.flavor_text;
               // 画像URLを取得するためのカスタム関数を呼び出し
-              const _image = getImage(data);
+              const _image =
+                data.sprites.other['official-artwork'].front_default ||
+                data.sprites.other.dream_world.front_default ||
+                '/pokemon_ball.svg';
               // アイコン画像URLを取得するためのカスタム関数を呼び出し
-              const _iconImage = getIconImage(data);
+              const _iconImage =
+                data.sprites.other.dream_world.front_default ||
+                data.sprites.other['official-artwork'].front_default ||
+                '/pokemon_ball.svg';
               // ポケモンのタイプを配列として取得
               const _types = data.types.map((typeInfo: { type: { name: string } }) => typeInfo.type.name);
               // タイプの日本語翻訳を取得
@@ -199,6 +161,8 @@ export default function Home() {
     setSearchInput('');
     setSelectedType('');
   };
+
+  if (allPokemons.length === 0) return;
 
   return (
     <>
