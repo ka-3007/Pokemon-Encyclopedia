@@ -26,7 +26,7 @@ export default function Home() {
   }, [allPokemons]);
 
   const onSearch = async () => {
-    if (!searchInput && selectedType) {
+    if (!(!searchInput && !selectedType)) {
       const filterPokemonList = await PokemonRepo.pokemonFilterQuery(searchInput, selectedType);
       setDisplayPokémon(filterPokemonList);
       setIsSearch(true);
