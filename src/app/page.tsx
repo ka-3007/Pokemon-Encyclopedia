@@ -47,7 +47,7 @@ export default function Home() {
   if (allPokemons.length === 0 || !displayPokémon) return;
 
   return (
-    <div className="bg-gradient-to-br from-blue-100 to-purple-100 pb-[3rem] pt-[2rem]">
+    <div className="bg-gradient-to-br from-blue-100 to-purple-100 pb-[5rem] pt-[3rem]">
       <h1 className="text-center text-4xl font-bold text-gray-800 mb-4">ポケモン図鑑</h1>
       <Search
         selectedType={selectedType}
