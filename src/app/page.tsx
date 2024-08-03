@@ -22,7 +22,11 @@ export default function Home() {
   const [displayPokémon, setDisplayPokémon] = useState<PokemonModel[]>();
 
   useEffect(() => {
+    if (allPokemons.length === 0) {
+      getAllPokemons();
+    }
     setDisplayPokémon(allPokemons);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allPokemons]);
 
   const onSearch = async () => {

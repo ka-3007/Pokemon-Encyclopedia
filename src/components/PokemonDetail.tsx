@@ -51,9 +51,9 @@ const PokemonDetail = ({ id, name, image, japaneseTypes, description, types, hei
         </div>
       </div>
       <button className="mt-4 flex items-center text-blue-500 hover:text-blue-700">
-        <ChevronLeft size={20} />
-        <Link href={'/'} className="ml-1">
-          戻る
+        <Link href="/" className="flex items-center text-blue-600 hover:text-blue-800">
+          <ChevronLeft size={20} />
+          <span className="ml-1">戻る</span>
         </Link>
       </button>
     </div>
