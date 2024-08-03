@@ -12,24 +12,24 @@ body {
 
 /* タイプごとの色変数 */
 :root {
-  --rock: rgb(148, 81, 81);
-  --ghost: rgb(247, 247, 247);
-  --electric: rgb(255, 255, 161);
-  --bug: #f6d6a7;
-  --poison: #e0a7f6;
-  --normal: #f4f4f4;
-  --fairy: rgba(255, 192, 203, 0.863);
-  --fire: #fbe3df;
-  --grass: #e2f9e1;
-  --water: #e0f1fd;
-  --dark: #9e9169;
-  --psychic: #fc5fd0;
-  --ground: #bc7b3d;
-  --steel: #6c676e;
-  --fighting: #de911f;
-  --ice: #92c3f4;
-  --dragon: #e08b2b;
-  --flying: #c6b7f5;
+  --dark: #9e9169; /* あく*/
+  --rock: rgb(148, 81, 81); /* いわ */
+  --psychic: #fc5fd0; /* エスパー */
+  --fighting: #de911f; /* かくとう */
+  --grass: #e2f9e1; /* くさ*/
+  --ghost: rgb(247, 247, 247); /* ゴースト */
+  --ice: #92c3f4; /* こおり */
+  --ground: #bc7b3d; /* じめん */
+  --electric: rgb(255, 255, 161); /* でんき */
+  --poison: #e0a7f6; /* どく */
+  --dragon: #e08b2b; /* ドラゴン */
+  --normal: #f4f4f4; /* ノーマル */
+  --steel: #6c676e; /* はがね */
+  --flying: #c6b7f5; /* ひこう */
+  --fairy: rgba(255, 192, 203, 0.863); /* フェアリー */
+  --fire: #fbe3df; /* ほのお */
+  --water: #e0f1fd; /* みず */
+  --bug: #f6d6a7; /* むし */
 }
 
 code {
