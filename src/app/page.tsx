@@ -8,6 +8,7 @@ import { PokemonRepo } from '@/repository/pokemon';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
+import { useInView } from 'react-intersection-observer';
 
 export default function Home() {
   const { isLoading, getAllPokemons } = useGetAllPokemons();
@@ -21,6 +22,12 @@ export default function Home() {
   //表示するポケモンを管理するステート
   const [displayPokémon, setDisplayPokémon] = useState<PokemonModel[]>();
 
+  // IntersectionObserverのフック
+  const { ref, inView } = useInView({
+    threshold: 0.8,
+    rootMargin: '0px 0px 400px 0px',
+  });
+
   useEffect(() => {
     if (allPokemons.length === 0) {
       getAllPokemons();
@@ -28,6 +35,13 @@ export default function Home() {
     setDisplayPokémon(allPokemons);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allPokemons]);
+
+  useEffect(() => {
+    if (inView && !isLoading && !isSearch) {
+      getAllPokemons();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inView, isLoading, isSearch]);
 
   const onSearch = async () => {
     if (!(!searchInput && !selectedType)) {
@@ -73,14 +87,7 @@ export default function Home() {
               </Link>
             ))}
           </div>
-          {!isSearch &&
-            (isLoading ? (
-              <div className="load-more">読み込み中...</div>
-            ) : (
-              <button className="load-more" onClick={getAllPokemons}>
-                もっとみる！
-              </button>
-            ))}
+          <div ref={ref}></div>
         </div>
       </div>
     </div>
