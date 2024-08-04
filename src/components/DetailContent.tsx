@@ -36,13 +36,15 @@ export function DetailContent() {
       {pokemon && (
         <PokemonDetail
           id={pokemon.id}
-          name={pokemon.japaneseName}
+          jpName={pokemon.japaneseName}
+          EnName={pokemon.name}
           image={pokemon.image}
           japaneseTypes={pokemon.japaneseTypes}
           description={pokemon.description}
           types={pokemon.types}
           height={pokemon.height}
           weight={pokemon.weight}
+          evolutionData={pokemon.evolutionData}
           key={pokemon.id}
         />
       )}

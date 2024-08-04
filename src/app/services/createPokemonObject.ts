@@ -4,6 +4,7 @@ import { PokemonRepo } from '@/repository/pokemon';
 import { typeTranslations } from '@/utils/typeTranslations';
 import axios from 'axios';
 import { getDoc, setDoc } from 'firebase/firestore';
+import { processEvolutionChain } from './processEvolutionChain';
 
 interface NameEntry {
   language: {
@@ -47,14 +48,17 @@ export const createPokemonObject = async (results: []) => {
           if (data.species && data.species.url) {
             // 詳細情報を取得するためにAPIリクエストを送信
             const speciesResponse = await axios.get(data.species.url);
+
             // 日本語の名前を取得
             const japaneseName = speciesResponse.data.names.find(
               (name: NameEntry) => name.language.name === 'ja',
             )?.name;
+
             // 日本語の説明文を取得
             const japaneseFlavorText = speciesResponse.data.flavor_text_entries.find(
               (entry: FlavorTextEntry) => entry.language.name === 'ja',
             )?.flavor_text;
+
             // 画像URLを取得するためのカスタム関数を呼び出し
             const _image =
               data.sprites.other['official-artwork'].front_default ||
@@ -65,10 +69,21 @@ export const createPokemonObject = async (results: []) => {
               data.sprites.other.dream_world.front_default ||
               data.sprites.other['official-artwork'].front_default ||
               '/pokemon_ball.svg';
+
             // ポケモンのタイプを配列として取得
             const _types = data.types.map((typeInfo: { type: { name: string } }) => typeInfo.type.name);
             // タイプの日本語翻訳を取得
             const _japaneseTypes = _types.map((type: string) => typeTranslations[type] || type);
+
+            // ポケモンの種データから進化チェーンのURLを取得
+            const evolutionChainUrl = speciesResponse.data.evolution_chain.url;
+            // 進化チェーンのURLを使って進化チェーンデータを取得
+            const evolutionResponse = await axios.get(evolutionChainUrl);
+            // 進化チェーンのデータから進化チェーンのルートを取得
+            const evolutionChain = evolutionResponse.data.chain;
+            // 進化チェーンを処理する関数を呼び出して、進化データを取得
+            const evolutionData = processEvolutionChain(evolutionChain);
+
             // ポケモンデータのオブジェクトを作成
             const pokemonData: PokemonModel = {
               id: data.id, // ポケモンのID
@@ -82,6 +97,7 @@ export const createPokemonObject = async (results: []) => {
               weight: data.weight / 10,
               description:
                 japaneseFlavorText || speciesResponse.data.flavor_text_entries[0].flavor_text || '説明はありません',
+              evolutionData: evolutionData,
             };
             // ポケモンデータをFirebaseに保存
             await setDoc(PokemonRepo.pokemonDocRef(pokemon.name), pokemonData);

@@ -1,26 +1,84 @@
 /* eslint-disable @next/next/no-img-element */
+
+import { PokemonModel } from '@/model/pokemon';
+import { getFromIndexedDB } from '@/repository/indexDB';
+import { PokemonRepo } from '@/repository/pokemon';
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import PokemonThumbnails from './PokemonThumbnails';
+import { PokemonEvolutionData } from '@/app/services/processEvolutionChain';
 
 type Props = {
   id: number;
-  name: string;
+  jpName: string;
+  EnName: string;
   image: string;
   japaneseTypes: string[];
   description: string;
   types: string[];
   height: number;
   weight: number;
+  evolutionData: PokemonEvolutionData;
 };
 
-const PokemonDetail = ({ id, name, image, japaneseTypes, description, types, height, weight }: Props) => {
+const PokemonDetail = ({
+  id,
+  jpName,
+  EnName,
+  image,
+  japaneseTypes,
+  description,
+  types,
+  height,
+  weight,
+  evolutionData,
+}: Props) => {
   const router = useRouter();
   const backgroundStyle =
     types.length > 1
       ? { background: `linear-gradient(135deg, var(--${types[0]}) 50%, var(--${types[1]}) 50%)` }
       : { background: `var(--${types[0]})` };
+
+  const [pokemonDetails, setPokemonDetails] = useState<Record<string, PokemonModel>>({});
+
+  useEffect(() => {
+    const fetchPokemonDetails = async () => {
+      if (evolutionData) {
+        const allPokemonNames = [
+          ...evolutionData?.normalEvolution?.map((name) => name),
+          ...evolutionData?.specialEvolution?.map((name) => name),
+        ];
+
+        const newPokemonDetails: Record<string, PokemonModel> = {};
+
+        for (const name of allPokemonNames) {
+          if (name !== EnName) {
+            try {
+              // IndexedDBからポケモンデータを取得しようとする
+              const cachedPokemon = await getFromIndexedDB(name);
+              if (cachedPokemon) {
+                // IndexedDBにデータが存在する場合、それを使用する
+                newPokemonDetails[name] = cachedPokemon;
+              } else {
+                const pokemon = await PokemonRepo.getPokemonDetail(name);
+                if (pokemon) {
+                  newPokemonDetails[name] = pokemon;
+                }
+              }
+            } catch (error: any) {
+              console.error(`Failed to fetch details for ${name}:`, error);
+            }
+          }
+        }
+
+        setPokemonDetails(newPokemonDetails);
+      }
+    };
+
+    fetchPokemonDetails();
+  }, [EnName, evolutionData]);
 
   return (
     <div className="bg-gradient-to-br from-blue-100 to-purple-100 p-4 font-sans">
@@ -29,12 +87,12 @@ const PokemonDetail = ({ id, name, image, japaneseTypes, description, types, hei
         style={backgroundStyle}
       >
         <div className="w-full md:w-1/2 p-8 md:p-12 flex items-center justify-center mobile-img">
-          <img src={image} alt={name} className="w-64 h-64 md:w-80 md:h-80 object-contain" />
+          <img src={image} alt={jpName} className="w-64 h-64 md:w-80 md:h-80 object-contain" />
         </div>
         <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-between mobile-description">
           <div>
             <div className="text-gray-600 text-base md:text-lg mb-2 md:mb-3">#{id.toString().padStart(3, '0')}</div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-2 md:mb-3">{name}</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-2 md:mb-3">{jpName}</h2>
             <h3 className="text-xl md:text-2xl mb-4 md:mb-6">{japaneseTypes.join(' / ')}</h3>
             <p className="text-sm md:text-base mb-6 md:mb-8 bg-white bg-opacity-50 p-4 md:p-6 rounded-lg shadow-inner">
               {description}
@@ -52,6 +110,27 @@ const PokemonDetail = ({ id, name, image, japaneseTypes, description, types, hei
           </div>
         </div>
       </div>
+
+      {pokemonDetails && Object.keys(pokemonDetails).length > 0 && (
+        <div className="p-4">
+          <h2 className="text-2xl font-bold mb-4">ポケモン詳細情報</h2>
+          <div className="flex flex-wrap justify-center">
+            {Object.values(pokemonDetails).map((pokemon) => (
+              <Link key={pokemon.id} href={`/detail?name=${pokemon.name}`}>
+                <PokemonThumbnails
+                  id={pokemon.id}
+                  name={pokemon.japaneseName}
+                  image={pokemon.image}
+                  iconImage={pokemon.iconImage}
+                  japaneseTypes={pokemon.japaneseTypes}
+                  types={pokemon.types}
+                />
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       <button onClick={router.back} className="mt-4 flex items-center text-blue-500 hover:text-blue-700">
         <ChevronLeft size={20} />
         <span className="ml-1">戻る</span>
@@ -61,3 +140,37 @@ const PokemonDetail = ({ id, name, image, japaneseTypes, description, types, hei
 };
 
 export default PokemonDetail;
+
+// const EvolutionChain: React.FC<{ evolutionData: PokemonEvolutionData }> = ({ evolutionData }) => {
+//   return (
+//     <div className="p-4">
+//       <h2 className="text-2xl font-bold mb-4">進化チェーン</h2>
+//       <div className="flex flex-col items-center">
+//         {evolutionData.normalEvolution.map((name, index) => (
+//           <React.Fragment key={name}>
+//             <div className="bg-white rounded-lg shadow-md p-4 m-2">
+//               <h3 className="text-xl font-bold">{name}</h3>
+//             </div>
+//             {index < evolutionData.normalEvolution.length - 1 && <div className="text-2xl my-2">↓</div>}
+//           </React.Fragment>
+//         ))}
+//       </div>
+//       {evolutionData.specialEvolution.length > 0 && (
+//         <div>
+//           <h3 className="text-xl font-bold mt-6 mb-2">特殊進化</h3>
+//           <div className="flex flex-wrap justify-center">
+//             {evolutionData.specialEvolution.map((name) => (
+//               <div key={name} className="bg-white rounded-lg shadow-md p-4 m-2">
+//                 <h3 className="text-xl font-bold">{name}</h3>
+//               </div>
+//             ))}
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// const PokemonEvolutionDisplay: React.FC<{ evolutionData: PokemonEvolutionData }> = ({ evolutionData }) => {
+//   return <EvolutionChain evolutionData={evolutionData} />;
+// };

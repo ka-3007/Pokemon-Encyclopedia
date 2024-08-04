@@ -1,3 +1,5 @@
+import { PokemonEvolutionData } from '@/app/services/processEvolutionChain';
+
 export type PokemonModel = {
   id: number;
   name: string;
@@ -9,4 +11,5 @@ export type PokemonModel = {
   height: number;
   weight: number;
   description: string;
+  evolutionData: PokemonEvolutionData;
 };
