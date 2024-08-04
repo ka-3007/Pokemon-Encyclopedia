@@ -80,7 +80,8 @@ export const createPokemonObject = async (results: []) => {
               japaneseTypes: _japaneseTypes, // 日本語のタイプの配列
               height: data.height / 10,
               weight: data.weight / 10,
-              description: japaneseFlavorText || 'Description not available', // 日本語の説明文
+              description:
+                japaneseFlavorText || speciesResponse.data.flavor_text_entries[0].flavor_text || '説明はありません',
             };
             // ポケモンデータをFirebaseに保存
             await setDoc(PokemonRepo.pokemonDocRef(pokemon.name), pokemonData);

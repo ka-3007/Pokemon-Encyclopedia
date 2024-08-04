@@ -52,11 +52,9 @@ const PokemonDetail = ({ id, name, image, japaneseTypes, description, types, hei
           </div>
         </div>
       </div>
-      <button className="mt-4 flex items-center text-blue-500 hover:text-blue-700">
-        <button onClick={router.back} className="flex items-center text-blue-600 hover:text-blue-800">
-          <ChevronLeft size={20} />
-          <span className="ml-1">戻る</span>
-        </button>
+      <button onClick={router.back} className="mt-4 flex items-center text-blue-500 hover:text-blue-700">
+        <ChevronLeft size={20} />
+        <span className="ml-1">戻る</span>
       </button>
     </div>
   );
