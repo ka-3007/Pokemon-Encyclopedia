@@ -1,4 +1,4 @@
-import { PokemonEvolutionData } from '@/app/services/processEvolutionChain';
+import { PokemonEvolutionData } from '@/services/processEvolutionChain';
 
 export type PokemonModel = {
   id: number;

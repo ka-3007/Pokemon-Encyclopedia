@@ -3,7 +3,7 @@ import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import { allPokemonsState, urlState } from '@/recoil/atom';
 import axios from 'axios';
-import { createPokemonObject } from '../services/createPokemonObject';
+import { createPokemonObject } from '@/services/createPokemonObject';
 
 export const useGetAllPokemons = () => {
   // すべてのポケモンデータを格納するステート。アプリ全体で使用される。

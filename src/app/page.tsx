@@ -1,13 +1,13 @@
 'use client';
 import PokemonThumbnails from '@/components/PokemonThumbnails';
 import Search from '@/components/Search';
+import { useGetAllPokemons } from '@/hooks/useGetAllPokemons';
 import { PokemonModel } from '@/model/pokemon';
 import { allPokemonsState } from '@/recoil/atom';
 import { PokemonRepo } from '@/repository/pokemon';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { useGetAllPokemons } from './hooks/useGetAllPokemons';
 
 export default function Home() {
   const { isLoading, getAllPokemons } = useGetAllPokemons();

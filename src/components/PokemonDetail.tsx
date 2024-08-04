@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import PokemonThumbnails from './PokemonThumbnails';
-import { PokemonEvolutionData } from '@/app/services/processEvolutionChain';
+import { PokemonEvolutionData } from '@/services/processEvolutionChain';
 
 type Props = {
   id: number;
