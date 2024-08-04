@@ -21,6 +21,7 @@ type Props = {
   height: number;
   weight: number;
   evolutionData: PokemonEvolutionData;
+  formNames: string[];
 };
 
 const PokemonDetail = ({
@@ -34,6 +35,7 @@ const PokemonDetail = ({
   height,
   weight,
   evolutionData,
+  formNames,
 }: Props) => {
   const router = useRouter();
   const backgroundStyle =
@@ -45,7 +47,7 @@ const PokemonDetail = ({
 
   useEffect(() => {
     const fetchPokemonDetails = async () => {
-      if (evolutionData) {
+      if (evolutionData || formNames) {
         const allPokemonNames = [
           ...evolutionData?.normalEvolution?.map((name) => name),
           ...evolutionData?.specialEvolution?.map((name) => name),
@@ -73,12 +75,35 @@ const PokemonDetail = ({
           }
         }
 
+        if (formNames) {
+          // フォーム違いのポケモン詳細を取得
+          for (const name of formNames) {
+            if (name !== EnName) {
+              try {
+                // IndexedDBからポケモンデータを取得しようとする
+                const cachedPokemon = await getFromIndexedDB(name);
+                if (cachedPokemon) {
+                  // IndexedDBにデータが存在する場合、それを使用する
+                  newPokemonDetails[name] = cachedPokemon;
+                } else {
+                  const pokemon = await PokemonRepo.getPokemonDetail(name);
+                  if (pokemon) {
+                    newPokemonDetails[name] = pokemon;
+                  }
+                }
+              } catch (error: any) {
+                console.error(`Failed to fetch details for ${name}:`, error);
+              }
+            }
+          }
+        }
+
         setPokemonDetails(newPokemonDetails);
       }
     };
 
     fetchPokemonDetails();
-  }, [EnName, evolutionData]);
+  }, [EnName, evolutionData, formNames]);
 
   return (
     <div className="bg-gradient-to-br from-blue-100 to-purple-100 p-4 font-sans">
@@ -113,7 +138,7 @@ const PokemonDetail = ({
 
       {pokemonDetails && Object.keys(pokemonDetails).length > 0 && (
         <div className="p-4">
-          <h2 className="text-2xl font-bold mb-4">ポケモン詳細情報</h2>
+          <h2 className="text-2xl font-bold mb-4">関連情報</h2>
           <div className="flex flex-wrap justify-center">
             {Object.values(pokemonDetails).map((pokemon) => (
               <Link key={pokemon.id} href={`/detail?name=${pokemon.name}`}>
@@ -140,37 +165,3 @@ const PokemonDetail = ({
 };
 
 export default PokemonDetail;
-
-// const EvolutionChain: React.FC<{ evolutionData: PokemonEvolutionData }> = ({ evolutionData }) => {
-//   return (
-//     <div className="p-4">
-//       <h2 className="text-2xl font-bold mb-4">進化チェーン</h2>
-//       <div className="flex flex-col items-center">
-//         {evolutionData.normalEvolution.map((name, index) => (
-//           <React.Fragment key={name}>
-//             <div className="bg-white rounded-lg shadow-md p-4 m-2">
-//               <h3 className="text-xl font-bold">{name}</h3>
-//             </div>
-//             {index < evolutionData.normalEvolution.length - 1 && <div className="text-2xl my-2">↓</div>}
-//           </React.Fragment>
-//         ))}
-//       </div>
-//       {evolutionData.specialEvolution.length > 0 && (
-//         <div>
-//           <h3 className="text-xl font-bold mt-6 mb-2">特殊進化</h3>
-//           <div className="flex flex-wrap justify-center">
-//             {evolutionData.specialEvolution.map((name) => (
-//               <div key={name} className="bg-white rounded-lg shadow-md p-4 m-2">
-//                 <h3 className="text-xl font-bold">{name}</h3>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// const PokemonEvolutionDisplay: React.FC<{ evolutionData: PokemonEvolutionData }> = ({ evolutionData }) => {
-//   return <EvolutionChain evolutionData={evolutionData} />;
-// };

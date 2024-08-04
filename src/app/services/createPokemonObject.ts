@@ -84,6 +84,20 @@ export const createPokemonObject = async (results: []) => {
             // 進化チェーンを処理する関数を呼び出して、進化データを取得
             const evolutionData = processEvolutionChain(evolutionChain);
 
+            // 各フォームの詳細情報から名前を取得
+            const formNamesPromises = speciesResponse.data.varieties.map(
+              async (variety: { pokemon: { name: string; url: string } }) => {
+                const formResponse = await axios.get(variety.pokemon.url);
+                const formData = formResponse.data;
+
+                // フォームの名前だけを返す
+                return formData.name;
+              },
+            );
+
+            // すべてのフォーム名を非同期に取得
+            const formNames = await Promise.all(formNamesPromises);
+
             // ポケモンデータのオブジェクトを作成
             const pokemonData: PokemonModel = {
               id: data.id, // ポケモンのID
@@ -98,6 +112,7 @@ export const createPokemonObject = async (results: []) => {
               description:
                 japaneseFlavorText || speciesResponse.data.flavor_text_entries[0].flavor_text || '説明はありません',
               evolutionData: evolutionData,
+              formNames: formNames,
             };
             // ポケモンデータをFirebaseに保存
             await setDoc(PokemonRepo.pokemonDocRef(pokemon.name), pokemonData);

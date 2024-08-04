@@ -45,6 +45,7 @@ export function DetailContent() {
           height={pokemon.height}
           weight={pokemon.weight}
           evolutionData={pokemon.evolutionData}
+          formNames={pokemon.formNames}
           key={pokemon.id}
         />
       )}

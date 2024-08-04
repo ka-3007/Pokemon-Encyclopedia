@@ -12,4 +12,5 @@ export type PokemonModel = {
   weight: number;
   description: string;
   evolutionData: PokemonEvolutionData;
+  formNames: string[];
 };
