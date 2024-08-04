@@ -138,7 +138,9 @@ const PokemonDetail = ({
 
       {pokemonDetails && Object.keys(pokemonDetails).length > 0 && (
         <div>
-          <h2 className="p-4 text-2xl font-bold mb-4">関連情報</h2>
+          <div className="pt-5 pl-1 flex flex-wrap justify-left">
+            <h2 className="text-2xl font-bold mb-4">関連情報</h2>
+          </div>
           <div className="flex flex-wrap justify-center">
             {Object.values(pokemonDetails).map((pokemon) => (
               <Link key={pokemon.id} href={`/detail?name=${pokemon.name}`}>
