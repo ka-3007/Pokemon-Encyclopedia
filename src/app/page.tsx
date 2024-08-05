@@ -58,8 +58,6 @@ export default function Home() {
     setIsSearch(false);
   };
 
-  if (allPokemons.length === 0 || !displayPokémon) return;
-
   return (
     <div className="bg-gradient-to-br from-blue-100 to-purple-100 pb-[5rem] pt-[3rem]">
       <h1 className="text-center text-4xl font-bold text-gray-800 mb-4">ポケモン図鑑</h1>
@@ -74,7 +72,7 @@ export default function Home() {
       <div className="app-container">
         <div className="pokemon-container">
           <div className="all-container">
-            {Array.from(new Map(displayPokémon.map((pokemon) => [pokemon.id, pokemon])).values()).map((pokemon) => (
+            {Array.from(new Map(displayPokémon?.map((pokemon) => [pokemon.id, pokemon])).values()).map((pokemon) => (
               <Link key={pokemon.id} href={`/detail?name=${pokemon.name}`}>
                 <PokemonThumbnails
                   id={pokemon.id}
