@@ -1,6 +1,5 @@
 import { DetailContent } from '@/components/DetailContent';
 import { PokemonModel } from '@/model/pokemon';
-import { headers } from 'next/headers';
 import { Suspense } from 'react';
 
 export default async function Detail({
@@ -10,11 +9,7 @@ export default async function Detail({
     name: string;
   };
 }) {
-  const headersList = headers();
-  const host = headersList.get('host');
-  const proto = headersList.get('x-forwarded-proto') || 'http';
-  const baseUrl = `${proto}://${host}`;
-  const response = await fetch(`${baseUrl}/api/fetchPokemonDetail?name=${searchParams.name}`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/fetchPokemonDetail?name=${searchParams.name}`, {
     cache: 'no-store',
   });
   const {

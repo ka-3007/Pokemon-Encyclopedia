@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import AppProvider from './provider';
-import { headers } from 'next/headers';
 import { PokemonModel } from '@/model/pokemon';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -17,11 +16,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersList = headers();
-  const host = headersList.get('host');
-  const proto = headersList.get('x-forwarded-proto') || 'http';
-  const baseUrl = `${proto}://${host}`;
-  const response = await fetch(`${baseUrl}/api/getAllPokemons`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/getAllPokemons`, {
     cache: 'no-store',
   });
   const { allPokemons, nextUrl }: { allPokemons: PokemonModel[]; nextUrl: string } = await response.json();
