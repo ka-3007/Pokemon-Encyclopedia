@@ -9,7 +9,7 @@ import PokemonThumbnails from './PokemonThumbnails';
 
 type Props = {
   pokemon: PokemonModel;
-  pokemonDetails: Record<string, PokemonModel>;
+  pokemonDetails: Record<string, PokemonModel> | undefined;
 };
 
 const PokemonDetail = ({ pokemon, pokemonDetails }: Props) => {

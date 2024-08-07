@@ -6,18 +6,12 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import PokemonDetail from './PokemonDetail';
 
-export function DetailContent({
-  pokemonDetail,
-  newPokemonDetails,
-}: {
-  pokemonDetail: PokemonModel;
-  newPokemonDetails: Record<string, PokemonModel>;
-}) {
+export function DetailContent() {
   const searchParams = useSearchParams();
   const name = searchParams.get('name');
 
-  const [pokemon, setPokemon] = useState<PokemonModel | undefined>(pokemonDetail);
-  const [pokemonDetails, setPokemonDetails] = useState<Record<string, PokemonModel>>(newPokemonDetails);
+  const [pokemon, setPokemon] = useState<PokemonModel | undefined>();
+  const [pokemonDetails, setPokemonDetails] = useState<Record<string, PokemonModel>>();
 
   useEffect(() => {
     if (name) {
