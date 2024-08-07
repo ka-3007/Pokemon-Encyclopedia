@@ -20,7 +20,7 @@ export default function Home() {
   //検索中かどうかを管理するステート
   const [isSearch, setIsSearch] = useState(false);
   //表示するポケモンを管理するステート
-  const [displayPokémon, setDisplayPokémon] = useState<PokemonModel[]>();
+  const [displayPokémon, setDisplayPokémon] = useState<PokemonModel[]>(allPokemons);
 
   // IntersectionObserverのフック
   const { ref, inView } = useInView({
@@ -29,9 +29,9 @@ export default function Home() {
   });
 
   useEffect(() => {
-    if (allPokemons.length === 0) {
-      getAllPokemons();
-    }
+    // if (allPokemons.length === 0) {
+    //   getAllPokemons();
+    // }
     setDisplayPokémon(allPokemons);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allPokemons]);
