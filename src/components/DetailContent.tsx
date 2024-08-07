@@ -97,20 +97,7 @@ export function DetailContent({
 
   return (
     <div className="bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen flex flex-col items-center justify-center">
-      {pokemon && (
-        <PokemonDetail
-          id={pokemon.id}
-          jpName={pokemon.japaneseName}
-          image={pokemon.image}
-          japaneseTypes={pokemon.japaneseTypes}
-          description={pokemon.description}
-          types={pokemon.types}
-          height={pokemon.height}
-          weight={pokemon.weight}
-          pokemonDetails={pokemonDetails}
-          key={pokemon.id}
-        />
-      )}
+      {pokemon && <PokemonDetail pokemon={pokemon} pokemonDetails={pokemonDetails} key={pokemon.id} />}
     </div>
   );
 }

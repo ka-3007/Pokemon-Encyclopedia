@@ -22,7 +22,11 @@ export default async function Detail({
     newPokemonDetails,
   }: { pokemonDetail: PokemonModel; newPokemonDetails: Record<string, PokemonModel> } = await response.json();
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen flex flex-col items-center justify-center"></div>
+      }
+    >
       <DetailContent pokemonDetail={pokemonDetail} newPokemonDetails={newPokemonDetails} />
     </Suspense>
   );
