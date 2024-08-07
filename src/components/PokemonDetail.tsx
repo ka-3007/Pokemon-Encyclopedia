@@ -1,109 +1,40 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { PokemonModel } from '@/model/pokemon';
-import { getFromIndexedDB } from '@/repository/indexDB';
-import { PokemonRepo } from '@/repository/pokemon';
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PokemonThumbnails from './PokemonThumbnails';
-import { PokemonEvolutionData } from '@/services/processEvolutionChain';
 
 type Props = {
   id: number;
   jpName: string;
-  EnName: string;
   image: string;
   japaneseTypes: string[];
   description: string;
   types: string[];
   height: number;
   weight: number;
-  evolutionData: PokemonEvolutionData;
-  formNames: string[];
+  pokemonDetails: Record<string, PokemonModel>;
 };
 
 const PokemonDetail = ({
   id,
   jpName,
-  EnName,
   image,
   japaneseTypes,
   description,
   types,
   height,
   weight,
-  evolutionData,
-  formNames,
+  pokemonDetails,
 }: Props) => {
   const router = useRouter();
   const backgroundStyle =
     types.length > 1
       ? { background: `linear-gradient(135deg, var(--${types[0]}) 50%, var(--${types[1]}) 50%)` }
       : { background: `var(--${types[0]})` };
-
-  const [pokemonDetails, setPokemonDetails] = useState<Record<string, PokemonModel>>({});
-
-  useEffect(() => {
-    const fetchPokemonDetails = async () => {
-      if (evolutionData || formNames) {
-        const allPokemonNames = [
-          ...evolutionData?.normalEvolution?.map((name) => name),
-          ...evolutionData?.specialEvolution?.map((name) => name),
-        ];
-
-        const newPokemonDetails: Record<string, PokemonModel> = {};
-
-        for (const name of allPokemonNames) {
-          if (name !== EnName) {
-            try {
-              // IndexedDBからポケモンデータを取得しようとする
-              const cachedPokemon = await getFromIndexedDB(name);
-              if (cachedPokemon) {
-                // IndexedDBにデータが存在する場合、それを使用する
-                newPokemonDetails[name] = cachedPokemon;
-              } else {
-                const pokemon = await PokemonRepo.getPokemonDetail(name);
-                if (pokemon) {
-                  newPokemonDetails[name] = pokemon;
-                }
-              }
-            } catch (error: any) {
-              console.error(`Failed to fetch details for ${name}:`, error);
-            }
-          }
-        }
-
-        if (formNames) {
-          // フォーム違いのポケモン詳細を取得
-          for (const name of formNames) {
-            if (name !== EnName) {
-              try {
-                // IndexedDBからポケモンデータを取得しようとする
-                const cachedPokemon = await getFromIndexedDB(name);
-                if (cachedPokemon) {
-                  // IndexedDBにデータが存在する場合、それを使用する
-                  newPokemonDetails[name] = cachedPokemon;
-                } else {
-                  const pokemon = await PokemonRepo.getPokemonDetail(name);
-                  if (pokemon) {
-                    newPokemonDetails[name] = pokemon;
-                  }
-                }
-              } catch (error: any) {
-                console.error(`Failed to fetch details for ${name}:`, error);
-              }
-            }
-          }
-        }
-
-        setPokemonDetails(newPokemonDetails);
-      }
-    };
-
-    fetchPokemonDetails();
-  }, [EnName, evolutionData, formNames]);
 
   return (
     <div className="bg-gradient-to-br from-blue-100 to-purple-100 p-4 font-sans">
@@ -158,7 +89,7 @@ const PokemonDetail = ({
         </div>
       )}
 
-      <button onClick={router.back} className="mt-4 flex items-center text-blue-500 hover:text-blue-700">
+      <button onClick={router.back} className="hidden sm:flex mt-4 flex items-center text-blue-500 hover:text-blue-700">
         <ChevronLeft size={20} />
         <span className="ml-1">戻る</span>
       </button>
