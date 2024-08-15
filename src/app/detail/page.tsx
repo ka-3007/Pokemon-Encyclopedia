@@ -40,32 +40,32 @@ async function fetchPokemonDetail(name: string) {
 
   const newPokemonDetails: Record<string, PokemonModel> = {};
   if (pokemonDetail) {
-    if (pokemonDetail?.evolutionData || pokemonDetail?.formNames) {
+    if (pokemonDetail.evolutionData || pokemonDetail.formNames) {
       const allPokemonNames = [
-        ...pokemonDetail?.evolutionData?.normalEvolution?.map((name) => name),
-        ...pokemonDetail?.evolutionData?.specialEvolution?.map((name) => name),
-      ];
+        ...(pokemonDetail.evolutionData?.normalEvolution || []),
+        ...(pokemonDetail.evolutionData?.specialEvolution || []),
+        ...(pokemonDetail.formNames || []),
+      ].filter((relatedName) => relatedName !== pokemonDetail.name);
 
-      for (const name of allPokemonNames) {
-        if (name !== pokemonDetail?.name) {
-          const pokemon = await PokemonRepo.getPokemonDetail(name);
-          if (pokemon) {
-            newPokemonDetails[name] = pokemon;
-          }
+      // すべての関連ポケモンの詳細を並列で取得
+      const pokemonDetailPromises = allPokemonNames.map(async (relatedName) => {
+        try {
+          const pokemon = await PokemonRepo.getPokemonDetail(relatedName);
+          return { name: relatedName, detail: pokemon };
+        } catch (error: any) {
+          console.error(`Failed to fetch details for ${relatedName}:`, error);
+          return { name: relatedName, detail: undefined };
         }
-      }
+      });
 
-      if (pokemonDetail?.formNames) {
-        // フォーム違いのポケモン詳細を取得
-        for (const name of pokemonDetail?.formNames) {
-          if (name !== pokemonDetail?.name) {
-            const pokemon = await PokemonRepo.getPokemonDetail(name);
-            if (pokemon) {
-              newPokemonDetails[name] = pokemon;
-            }
-          }
+      const relatedPokemonDetails = await Promise.all(pokemonDetailPromises);
+
+      // 取得した詳細情報を newPokemonDetails オブジェクトに格納
+      relatedPokemonDetails.forEach(({ name, detail }) => {
+        if (detail) {
+          newPokemonDetails[name] = detail;
         }
-      }
+      });
     }
   }
 

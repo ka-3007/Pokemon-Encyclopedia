@@ -21,83 +21,58 @@ export function DetailContent({
 
   useEffect(() => {
     if (name) {
-      let newPokemon: PokemonModel | undefined;
       (async function () {
-        //ポケモン詳細情報取得
         try {
-          // IndexedDBからポケモンデータを取得しようとする
+          // ポケモン詳細情報を取得する
+          // まず、IndexedDBからキャッシュされたポケモンデータを取得し、存在しない場合はAPIから取得する
           const cachedPokemon = await getFromIndexedDB(name);
-          if (cachedPokemon) {
-            // IndexedDBにデータが存在する場合、それを使用する
-            setPokemon(cachedPokemon);
-            newPokemon = cachedPokemon;
-          } else {
-            const pokemon = await PokemonRepo.getPokemonDetail(name);
-            setPokemon(pokemon);
-            newPokemon = pokemon;
+          let newPokemon = cachedPokemon || (await PokemonRepo.getPokemonDetail(name));
+          setPokemon(newPokemon); // 取得したポケモンデータを状態にセットする
+
+          // 進化データやフォーム違いがある場合、関連するポケモン情報を取得する
+          if (newPokemon?.evolutionData || newPokemon?.formNames) {
+            // 進化データ（通常進化、特殊進化）およびフォーム名を一つの配列にまとめる
+            // 自分自身の名前は除外する
+            const allPokemonNames = [
+              ...(newPokemon.evolutionData?.normalEvolution || []),
+              ...(newPokemon.evolutionData?.specialEvolution || []),
+              ...(newPokemon.formNames || []),
+            ].filter((relatedName) => relatedName !== newPokemon?.name);
+
+            // それぞれのポケモン名に対して、詳細情報を取得する非同期処理を並列で実行する
+            const pokemonDetailPromises = allPokemonNames.map(async (relatedName) => {
+              try {
+                // IndexedDBからキャッシュされたポケモンデータを取得し、存在しない場合はAPIから取得する
+                const cachedRelatedPokemon = await getFromIndexedDB(relatedName);
+                return cachedRelatedPokemon || (await PokemonRepo.getPokemonDetail(relatedName));
+              } catch (error: any) {
+                // エラーが発生した場合、エラーメッセージを表示し、undefinedを返す
+                console.error(`Failed to fetch details for ${relatedName}:`, error);
+                return undefined;
+              }
+            });
+
+            // すべての関連ポケモンの詳細情報が取得されるのを待つ
+            const relatedPokemonDetails = await Promise.all(pokemonDetailPromises);
+            const newPokemonDetails: Record<string, PokemonModel> = {};
+
+            // 取得されたポケモン詳細情報を新しいオブジェクトに格納する
+            relatedPokemonDetails.forEach((detail, index) => {
+              if (detail) {
+                newPokemonDetails[allPokemonNames[index]] = detail;
+              }
+            });
+
+            // 取得した関連ポケモン情報を状態にセットする
+            setPokemonDetails(newPokemonDetails);
           }
         } catch (error: any) {
+          // ポケモン詳細情報取得中にエラーが発生した場合、エラーメッセージを表示する
           console.error(error);
-        }
-
-        //ポケモン関連情報取得
-        if (newPokemon?.evolutionData || newPokemon?.formNames) {
-          const allPokemonNames = [
-            ...newPokemon?.evolutionData?.normalEvolution?.map((name) => name),
-            ...newPokemon?.evolutionData?.specialEvolution?.map((name) => name),
-          ];
-
-          const newPokemonDetails: Record<string, PokemonModel> = {};
-
-          for (const name of allPokemonNames) {
-            if (name !== newPokemon?.name) {
-              try {
-                // IndexedDBからポケモンデータを取得しようとする
-                const cachedPokemon = await getFromIndexedDB(name);
-                if (cachedPokemon) {
-                  // IndexedDBにデータが存在する場合、それを使用する
-                  newPokemonDetails[name] = cachedPokemon;
-                } else {
-                  const pokemon = await PokemonRepo.getPokemonDetail(name);
-                  if (pokemon) {
-                    newPokemonDetails[name] = pokemon;
-                  }
-                }
-              } catch (error: any) {
-                console.error(`Failed to fetch details for ${name}:`, error);
-              }
-            }
-          }
-
-          if (newPokemon?.formNames) {
-            // フォーム違いのポケモン詳細を取得
-            for (const name of newPokemon?.formNames) {
-              if (name !== newPokemon?.name) {
-                try {
-                  // IndexedDBからポケモンデータを取得しようとする
-                  const cachedPokemon = await getFromIndexedDB(name);
-                  if (cachedPokemon) {
-                    // IndexedDBにデータが存在する場合、それを使用する
-                    newPokemonDetails[name] = cachedPokemon;
-                  } else {
-                    const pokemon = await PokemonRepo.getPokemonDetail(name);
-                    if (pokemon) {
-                      newPokemonDetails[name] = pokemon;
-                    }
-                  }
-                } catch (error: any) {
-                  console.error(`Failed to fetch details for ${name}:`, error);
-                }
-              }
-            }
-          }
-
-          setPokemonDetails(newPokemonDetails);
         }
       })();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name]);
+  }, [name]); // nameが変更されるたびに、上記の非同期処理を再実行する
 
   return (
     <div className="bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen flex flex-col items-center justify-center">
