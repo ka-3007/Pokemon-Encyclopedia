@@ -21,6 +21,7 @@ export function DetailContent({
 
   useEffect(() => {
     if (name) {
+      let newPokemon: PokemonModel | undefined;
       (async function () {
         //ポケモン詳細情報取得
         try {
@@ -29,25 +30,27 @@ export function DetailContent({
           if (cachedPokemon) {
             // IndexedDBにデータが存在する場合、それを使用する
             setPokemon(cachedPokemon);
+            newPokemon = cachedPokemon;
           } else {
             const pokemon = await PokemonRepo.getPokemonDetail(name);
             setPokemon(pokemon);
+            newPokemon = pokemon;
           }
         } catch (error: any) {
           console.error(error);
         }
 
         //ポケモン関連情報取得
-        if (pokemon?.evolutionData || pokemon?.formNames) {
+        if (newPokemon?.evolutionData || newPokemon?.formNames) {
           const allPokemonNames = [
-            ...pokemon?.evolutionData?.normalEvolution?.map((name) => name),
-            ...pokemon?.evolutionData?.specialEvolution?.map((name) => name),
+            ...newPokemon?.evolutionData?.normalEvolution?.map((name) => name),
+            ...newPokemon?.evolutionData?.specialEvolution?.map((name) => name),
           ];
 
           const newPokemonDetails: Record<string, PokemonModel> = {};
 
           for (const name of allPokemonNames) {
-            if (name !== pokemon?.name) {
+            if (name !== newPokemon?.name) {
               try {
                 // IndexedDBからポケモンデータを取得しようとする
                 const cachedPokemon = await getFromIndexedDB(name);
@@ -66,10 +69,10 @@ export function DetailContent({
             }
           }
 
-          if (pokemon?.formNames) {
+          if (newPokemon?.formNames) {
             // フォーム違いのポケモン詳細を取得
-            for (const name of pokemon?.formNames) {
-              if (name !== pokemon?.name) {
+            for (const name of newPokemon?.formNames) {
+              if (name !== newPokemon?.name) {
                 try {
                   // IndexedDBからポケモンデータを取得しようとする
                   const cachedPokemon = await getFromIndexedDB(name);
