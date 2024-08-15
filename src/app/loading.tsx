@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100">
+    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100">
       <div className="text-center">
         <p className="text-2xl font-semibold text-indigo-600 font-roboto">読み込み中...</p>
         <div className="mt-4 flex justify-center space-x-2">
