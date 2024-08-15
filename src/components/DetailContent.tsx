@@ -93,7 +93,8 @@ export function DetailContent({
         }
       })();
     }
-  }, [name, pokemon?.evolutionData, pokemon?.formNames, pokemon?.name]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name]);
 
   return (
     <div className="bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen flex flex-col items-center justify-center">
