@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { useInView } from 'react-intersection-observer';
+import { usePathname } from 'next/navigation';
 
 export default function Home() {
   const { isLoading, getAllPokemons } = useGetAllPokemons();
@@ -58,8 +59,28 @@ export default function Home() {
     setIsSearch(false);
   };
 
+  const pathname = usePathname();
+  const currentURL = `${process.env.NEXT_PUBLIC_APP_URL}${pathname}`;
+  const twitterShareURL = `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+    currentURL,
+  )}&text=${encodeURIComponent('このページをチェック！')}`;
+
   return (
     <div className="bg-gradient-to-br from-blue-100 to-purple-100 pb-[5rem] pt-[3rem]">
+      <a href={twitterShareURL} target="_blank" rel="noopener noreferrer">
+        <button
+          style={{
+            backgroundColor: '#1DA1F2',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            padding: '10px 20px',
+            cursor: 'pointer',
+          }}
+        >
+          Twitterでシェア
+        </button>
+      </a>
       <h1 className="text-center text-4xl font-bold text-gray-800 mb-4">ポケモン図鑑</h1>
       <Search
         selectedType={selectedType}
