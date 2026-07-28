@@ -1,3 +1,4 @@
+'use client';
 /* eslint-disable @next/next/no-img-element */
 
 import { PokemonModel } from '@/model/pokemon';
@@ -63,7 +64,7 @@ const PokemonDetail = ({ pokemon, pokemonDetails }: Props) => {
           </div>
           <div className="flex flex-wrap justify-center">
             {Object.values(pokemonDetails).map((pokemon) => (
-              <Link key={pokemon.id} href={`/detail?name=${pokemon.name}`}>
+              <Link key={pokemon.id} href={`/detail/${pokemon.name}`}>
                 <PokemonThumbnails
                   id={pokemon.id}
                   name={pokemon.japaneseName}

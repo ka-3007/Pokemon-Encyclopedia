@@ -3,7 +3,6 @@ import axios from 'axios';
 import { processEvolutionChain } from './processEvolutionChain';
 import { setDoc } from 'firebase/firestore';
 import { PokemonRepo } from '@/repository/pokemon';
-import { saveToIndexedDB } from '@/repository/indexDB';
 import { typeTranslations } from '@/utils/typeTranslations';
 
 interface NameEntry {
@@ -93,13 +92,8 @@ const fetchPokemonData = async (pokemonName: string) => {
       evolutionData: evolutionData,
       formNames: formNames,
     };
-    // ポケモンデータをFirebaseに保存
+    // ポケモンデータをFirebaseに保存(サーバーサイドからのみ呼ばれる)
     await setDoc(PokemonRepo.pokemonDocRef(pokemonName), pokemonData);
-    // クライアントサイドで実行されている場合のみIndexedDBに保存
-    if (typeof window !== 'undefined') {
-      // ポケモンデータをIndexedDBに保存
-      await saveToIndexedDB(pokemonData);
-    }
 
     return pokemonData;
   }
