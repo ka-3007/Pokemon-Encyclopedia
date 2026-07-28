@@ -5,8 +5,9 @@ import { ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useMemo } from 'react';
 import PokemonThumbnails from './PokemonThumbnails';
+import { appearanceKey, uniqueByAppearance } from '@/utils/pokemonAppearance';
 
 type Props = {
   pokemon: PokemonModel;
@@ -15,6 +16,14 @@ type Props = {
 
 const PokemonDetail = ({ pokemon, pokemonDetails }: Props) => {
   const router = useRouter();
+
+  // 見た目が同じフォルム違いを1件に統一し、表示中のポケモン自身と同じ見た目のカードも除く
+  const relatedPokemons = useMemo(() => {
+    const currentKey = appearanceKey(pokemon);
+    return uniqueByAppearance(Object.values(pokemonDetails ?? {})).filter(
+      (related) => appearanceKey(related) !== currentKey,
+    );
+  }, [pokemon, pokemonDetails]);
   const backgroundStyle =
     pokemon.types.length > 1
       ? { background: `linear-gradient(135deg, var(--${pokemon.types[0]}) 50%, var(--${pokemon.types[1]}) 50%)` }
@@ -64,13 +73,13 @@ const PokemonDetail = ({ pokemon, pokemonDetails }: Props) => {
         </div>
       </div>
 
-      {pokemonDetails && Object.keys(pokemonDetails).length > 0 && (
+      {relatedPokemons.length > 0 && (
         <div>
           <div className="pt-5 pl-1 flex flex-wrap justify-left">
             <h2 className="text-2xl font-bold mb-4">関連情報</h2>
           </div>
           <div className="flex flex-wrap justify-center">
-            {Object.values(pokemonDetails).map((pokemon) => (
+            {relatedPokemons.map((pokemon) => (
               <Link key={pokemon.id} href={`/detail/${pokemon.name}`}>
                 <PokemonThumbnails
                   id={pokemon.id}

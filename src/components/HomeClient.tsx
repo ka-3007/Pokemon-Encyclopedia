@@ -10,6 +10,7 @@ import Search from '@/components/Search';
 import { PokemonPage } from '@/lib/pokemonServer';
 import { PokemonModel } from '@/model/pokemon';
 import { PokemonRepo } from '@/repository/pokemon';
+import { uniqueByAppearance } from '@/utils/pokemonAppearance';
 
 export default function HomeClient({ initialPage }: { initialPage: PokemonPage }) {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
@@ -36,6 +37,9 @@ export default function HomeClient({ initialPage }: { initialPage: PokemonPage }
   const [searchResults, setSearchResults] = useState<PokemonModel[]>([]);
 
   const displayPokemons = isSearch ? searchResults : allPokemons;
+
+  // 見た目がまったく同じカード(画像なしフォルム違いなど)は最初の1件(基本フォルム)に統一する
+  const uniquePokemons = useMemo(() => uniqueByAppearance(displayPokemons ?? []), [displayPokemons]);
 
   // IntersectionObserverのフック
   const { ref, inView } = useInView({
@@ -78,7 +82,7 @@ export default function HomeClient({ initialPage }: { initialPage: PokemonPage }
       <div className="app-container">
         <div className="pokemon-container">
           <div className="all-container">
-            {Array.from(new Map(displayPokemons?.map((pokemon) => [pokemon.id, pokemon])).values()).map((pokemon) => (
+            {uniquePokemons.map((pokemon) => (
               <Link key={pokemon.id} href={`/detail/${pokemon.name}`}>
                 <PokemonThumbnails
                   id={pokemon.id}

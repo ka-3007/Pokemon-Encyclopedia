@@ -52,6 +52,22 @@ const pickIconImage = (sprites: SpriteSet): string | null =>
   sprites.front_default ||
   null;
 
+// 画像の内容のSHA-1ハッシュを計算する。フォルム違いには「URLは別だが中身は同一の画像」
+// (例: メテノの隕石フォルム7色)があり、URL比較では重複表示を検出できないため、
+// 中身のハッシュを保存しておき表示時の重複判定に使う
+const hashImage = async (url: string): Promise<string | null> => {
+  if (!url.startsWith('http')) return null;
+  try {
+    const response = await axios.get<ArrayBuffer>(url, { responseType: 'arraybuffer' });
+    const digest = await crypto.subtle.digest('SHA-1', response.data);
+    return Array.from(new Uint8Array(digest))
+      .map((byte) => byte.toString(16).padStart(2, '0'))
+      .join('');
+  } catch {
+    return null;
+  }
+};
+
 const fetchPokemonData = async (pokemonName: string) => {
   // ポケモンAPIからポケモンのデータを取得するためのURLを設定
   const pokemonUrl = `https://pokeapi.co/api/v2/pokemon/${pokemonName}`;
@@ -97,6 +113,8 @@ const fetchPokemonData = async (pokemonName: string) => {
     _image = _image || '/pokemon_ball.svg';
     _iconImage = _iconImage || '/pokemon_ball.svg';
 
+    const imageHash = await hashImage(_image);
+
     // ポケモンのタイプを配列として取得
     const _types = data.types.map((typeInfo: { type: { name: string } }) => typeInfo.type.name);
     // タイプの日本語翻訳を取得
@@ -130,6 +148,7 @@ const fetchPokemonData = async (pokemonName: string) => {
       japaneseName, // ポケモンの日本語名
       iconImage: _iconImage, // アイコン画像URL
       image: _image, // 画像URL
+      imageHash, // 画像内容のハッシュ(見た目が同じポケモンの重複表示判定に使う)
       types: _types, // タイプの配列
       japaneseTypes: _japaneseTypes, // 日本語のタイプの配列
       height: data.height / 10,

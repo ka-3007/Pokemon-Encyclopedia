@@ -5,7 +5,7 @@
 //   - Firestoreの既存ドキュメントの再取得判定 (dataVersionフィールドとの比較)
 //   - サーバー側 unstable_cache のキャッシュキー (pokemon-page-v2 など)
 //   - クライアント側 TanStack Query 永続キャッシュの buster
-export const POKEMON_DATA_VERSION = 2;
+export const POKEMON_DATA_VERSION = 4;
 
 // キャッシュキーやbusterに付けるバージョンタグ (例: 'v2')
 export const CACHE_VERSION_TAG = `v${POKEMON_DATA_VERSION}`;
