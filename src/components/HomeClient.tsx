@@ -2,7 +2,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 import PokemonThumbnails from '@/components/PokemonThumbnails';
@@ -11,6 +11,9 @@ import { PokemonPage } from '@/lib/pokemonServer';
 import { PokemonModel } from '@/model/pokemon';
 import { PokemonRepo } from '@/repository/pokemon';
 import { uniqueByAppearance } from '@/utils/pokemonAppearance';
+
+// 詳細ページへ移動する直前のスクロール位置の保存先キー
+const SCROLL_POSITION_KEY = 'home-scroll-position';
 
 export default function HomeClient({ initialPage }: { initialPage: PokemonPage }) {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
@@ -27,10 +30,6 @@ export default function HomeClient({ initialPage }: { initialPage: PokemonPage }
   // 取得済みの全ページをフラットな一覧にする
   const allPokemons = useMemo(() => data.pages.flatMap((page) => page.pokemons), [data]);
 
-  // ユーザーが選択したポケモンのタイプを管理するステート。フィルター機能に使用。
-  const [selectedType, setSelectedType] = useState<string>();
-  // ユーザーが入力した検索キーワードを管理するステート。検索機能に使用。
-  const [searchInput, setSearchInput] = useState('');
   //検索中かどうかを管理するステート
   const [isSearch, setIsSearch] = useState(false);
   //検索結果を管理するステート
@@ -53,7 +52,35 @@ export default function HomeClient({ initialPage }: { initialPage: PokemonPage }
     }
   }, [inView, hasNextPage, isFetchingNextPage, isSearch, fetchNextPage]);
 
-  const onSearch = async () => {
+  // 詳細ページから戻ってきたときに保存しておいたスクロール位置へ復元する。
+  // 一覧の高さはキャッシュ復元で徐々に伸びるため、復元先まで届く高さになるのを待つ
+  const pendingScrollY = useRef<number | null>(null);
+  useEffect(() => {
+    const saved = sessionStorage.getItem(SCROLL_POSITION_KEY);
+    sessionStorage.removeItem(SCROLL_POSITION_KEY);
+    if (saved === null) return;
+    pendingScrollY.current = Number(saved);
+    // キャッシュがクリアされているなど、高さが復元されない場合は諦める
+    const timer = setTimeout(() => {
+      pendingScrollY.current = null;
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+  useEffect(() => {
+    if (pendingScrollY.current === null) return;
+    const maxScrollY = document.documentElement.scrollHeight - window.innerHeight;
+    if (pendingScrollY.current <= maxScrollY) {
+      window.scrollTo(0, pendingScrollY.current);
+      pendingScrollY.current = null;
+    }
+  }, [allPokemons.length]);
+
+  // 詳細ページへ移動する直前に現在のスクロール位置を保存する
+  const saveScrollPosition = () => {
+    sessionStorage.setItem(SCROLL_POSITION_KEY, String(window.scrollY));
+  };
+
+  const onSearch = async (searchInput: string, selectedType: string | undefined) => {
     if (!(!searchInput && !selectedType)) {
       const filterPokemonList = await PokemonRepo.pokemonFilterQuery(searchInput, selectedType);
       setSearchResults(filterPokemonList);
@@ -63,27 +90,18 @@ export default function HomeClient({ initialPage }: { initialPage: PokemonPage }
 
   const onReset = async () => {
     setSearchResults([]);
-    setSearchInput('');
-    setSelectedType('');
     setIsSearch(false);
   };
 
   return (
     <div className="bg-gradient-to-br from-blue-100 to-purple-100 pb-[5rem] pt-[3rem]">
       <h1 className="text-center text-4xl font-bold text-gray-800 mb-4">ポケモン図鑑</h1>
-      <Search
-        selectedType={selectedType}
-        setSelectedType={setSelectedType}
-        searchInput={searchInput}
-        setSearchInput={setSearchInput}
-        onSearch={onSearch}
-        onReset={onReset}
-      />
+      <Search onSearch={onSearch} onReset={onReset} />
       <div className="app-container">
         <div className="pokemon-container">
           <div className="all-container">
             {uniquePokemons.map((pokemon) => (
-              <Link key={pokemon.id} href={`/detail/${pokemon.name}`}>
+              <Link key={pokemon.id} href={`/detail/${pokemon.name}`} onClick={saveScrollPosition}>
                 <PokemonThumbnails
                   id={pokemon.id}
                   name={pokemon.japaneseName}

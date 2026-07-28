@@ -33,5 +33,5 @@ const PokemonThumbnails = ({ id, name, image, iconImage, japaneseTypes, types }:
   );
 };
 
-// デフォルトエクスポートする
-export default PokemonThumbnails;
+// 一覧に大量に並ぶため、propsが変わらない限り再レンダリングしない
+export default React.memo(PokemonThumbnails);

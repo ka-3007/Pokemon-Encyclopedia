@@ -4,7 +4,6 @@ import { PokemonModel } from '@/model/pokemon';
 import { ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import React, { useMemo } from 'react';
 import PokemonThumbnails from './PokemonThumbnails';
 import { appearanceKey, uniqueByAppearance } from '@/utils/pokemonAppearance';
@@ -15,8 +14,6 @@ type Props = {
 };
 
 const PokemonDetail = ({ pokemon, pokemonDetails }: Props) => {
-  const router = useRouter();
-
   // 見た目が同じフォルム違いを1件に統一し、表示中のポケモン自身と同じ見た目のカードも除く
   const relatedPokemons = useMemo(() => {
     const currentKey = appearanceKey(pokemon);
@@ -95,10 +92,10 @@ const PokemonDetail = ({ pokemon, pokemonDetails }: Props) => {
         </div>
       )}
 
-      <button onClick={router.back} className="hidden sm:flex mt-4 flex items-center text-blue-500 hover:text-blue-700">
+      <Link href="/" className="hidden sm:flex mt-4 flex items-center text-blue-500 hover:text-blue-700">
         <ChevronLeft size={20} />
         <span className="ml-1">戻る</span>
-      </button>
+      </Link>
     </div>
   );
 };
