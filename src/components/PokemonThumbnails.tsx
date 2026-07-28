@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+import Image from 'next/image';
 import React from 'react';
 
 type Props = {
@@ -22,8 +22,9 @@ const PokemonThumbnails = ({ id, name, image, iconImage, japaneseTypes, types }:
       <div className="number">
         <small>#0{id}</small>
       </div>
-      <img src={image} alt={name} />
-      <img src={iconImage} alt={name} className="icon-image" />
+      {/* next/imageはデフォルトで遅延読み込みされ、ビューポート付近の画像だけリクエストされる */}
+      <Image src={image} alt={name} width={120} height={120} />
+      <Image src={iconImage} alt={name} className="icon-image" width={60} height={60} />
       <div className="detail-wrapper">
         <h4>{name}</h4>
         <h3>{japaneseTypes.join(' / ')}</h3>

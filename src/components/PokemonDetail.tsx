@@ -1,8 +1,8 @@
 'use client';
-/* eslint-disable @next/next/no-img-element */
 
 import { PokemonModel } from '@/model/pokemon';
 import { ChevronLeft } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
@@ -27,7 +27,14 @@ const PokemonDetail = ({ pokemon, pokemonDetails }: Props) => {
         style={backgroundStyle}
       >
         <div className="w-full md:w-1/2 p-8 md:p-12 flex items-center justify-center mobile-img">
-          <img src={pokemon.image} alt={pokemon.japaneseName} className="w-64 h-64 md:w-80 md:h-80 object-contain" />
+          <Image
+            src={pokemon.image}
+            alt={pokemon.japaneseName}
+            width={320}
+            height={320}
+            priority
+            className="w-64 h-64 md:w-80 md:h-80 object-contain"
+          />
         </div>
         <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-between mobile-description">
           <div>
