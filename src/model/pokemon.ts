@@ -1,6 +1,7 @@
 import { PokemonEvolutionData } from '@/services/processEvolutionChain';
 
 export type PokemonModel = {
+  dataVersion?: number;
   id: number;
   name: string;
   japaneseName: string;

@@ -7,8 +7,7 @@ import React, { ReactNode, useState } from 'react';
 
 import AnalyticsProvider from '@/components/AnalyticsProvider';
 import { idbStorage } from '@/lib/queryPersister';
-
-const ONE_DAY_MS = 1000 * 60 * 60 * 24;
+import { CACHE_TTL_MS, CACHE_VERSION_TAG } from '@/config/cache';
 
 export default function AppProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -17,8 +16,8 @@ export default function AppProvider({ children }: { children: ReactNode }) {
         defaultOptions: {
           queries: {
             // ポケモンデータはほぼ不変なので1日はキャッシュを使い、再取得しない
-            staleTime: ONE_DAY_MS,
-            gcTime: ONE_DAY_MS,
+            staleTime: CACHE_TTL_MS,
+            gcTime: CACHE_TTL_MS,
             retry: 1,
           },
         },
@@ -29,8 +28,8 @@ export default function AppProvider({ children }: { children: ReactNode }) {
   return (
     <PersistQueryClientProvider
       client={queryClient}
-      // busterを変えると既存の永続キャッシュを無効化できる(データ構造変更時に更新する)
-      persistOptions={{ persister, maxAge: ONE_DAY_MS, buster: 'v1' }}
+      // busterはPOKEMON_DATA_VERSIONに連動しており、バージョンを上げると既存の永続キャッシュが無効化される
+      persistOptions={{ persister, maxAge: CACHE_TTL_MS, buster: CACHE_VERSION_TAG }}
     >
       <AnalyticsProvider>{children}</AnalyticsProvider>
     </PersistQueryClientProvider>

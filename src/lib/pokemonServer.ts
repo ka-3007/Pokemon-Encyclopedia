@@ -5,19 +5,20 @@ import axios from 'axios';
 import { PokemonModel } from '@/model/pokemon';
 import { PokemonRepo } from '@/repository/pokemon';
 import fetchPokemonData from '@/services/fetchPokemonData';
+import { CACHE_TTL_SECONDS, CACHE_VERSION_TAG, POKEMON_DATA_VERSION } from '@/config/cache';
 
 export const PAGE_SIZE = 50;
-const ONE_DAY_SECONDS = 60 * 60 * 24;
 
 export type PokemonPage = {
   pokemons: PokemonModel[];
   nextOffset: number | null;
 };
 
-// Firestoreから取得し、存在しなければPokeAPIから取得してFirestoreに保存する
+// Firestoreから取得し、存在しなければPokeAPIから取得してFirestoreに保存する。
+// 古いバージョンの形式で保存されたドキュメントも再取得して上書きする
 const getOrSeedPokemon = async (name: string): Promise<PokemonModel | null> => {
   const pokemonDoc = await getDoc(PokemonRepo.pokemonDocRef(name));
-  if (pokemonDoc.exists()) {
+  if (pokemonDoc.exists() && pokemonDoc.data().dataVersion === POKEMON_DATA_VERSION) {
     return pokemonDoc.data();
   }
   return fetchPokemonData(name);
@@ -45,8 +46,8 @@ export const getPokemonPage = unstable_cache(
 
     return { pokemons, nextOffset: data.next ? offset + PAGE_SIZE : null };
   },
-  ['pokemon-page'],
-  { revalidate: ONE_DAY_SECONDS },
+  [`pokemon-page-${CACHE_VERSION_TAG}`],
+  { revalidate: CACHE_TTL_SECONDS },
 );
 
 // ポケモン1匹の詳細を取得する(名前ごとに1日キャッシュ)
@@ -59,8 +60,8 @@ export const getPokemonDetail = unstable_cache(
       return null;
     }
   },
-  ['pokemon-detail'],
-  { revalidate: ONE_DAY_SECONDS },
+  [`pokemon-detail-${CACHE_VERSION_TAG}`],
+  { revalidate: CACHE_TTL_SECONDS },
 );
 
 // 詳細ページ用に、本体と進化先・フォーム違いの詳細をまとめて取得する
