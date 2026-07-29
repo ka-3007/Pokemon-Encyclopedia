@@ -6,8 +6,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 PokeAPI のデータを日本語表示するポケモン図鑑 Web アプリ。Next.js 14 (App Router) + React 18 + TypeScript + Tailwind CSS。データは PokeAPI → Firestore → 各層キャッシュという流れで配信される。コードコメント・コミットメッセージは日本語。
 
-※ README の技術スタック表に「Recoil」とあるが実際は TanStack Query に移行済み。
-
 ## コマンド
 
 ```bash
