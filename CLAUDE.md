@@ -16,8 +16,9 @@ npm run lint     # ESLint (next lint)
 
 - Firebase は Firestore / Analytics のみ利用（Hosting へのデプロイはしていない）。
 
-- テストは存在しない。
+- テストは存在しない。変更後の検証は `npm run lint` と `npx tsc --noEmit`（型チェック）で行う。
 - Firebase 接続に `.env.local` が必要（`NEXT_PUBLIC_FIREBASE_*` 7変数、README 参照）。
+- インポートはパスエイリアス `@/*`（= `src/*`）を使う。
 
 ## アーキテクチャ
 
@@ -46,6 +47,8 @@ npm run lint     # ESLint (next lint)
 
 ### その他の前提
 
+- サーバーサイドでも firebase-admin ではなく**クライアント SDK**（`firebase/firestore`）を使っている（`src/lib/firebase.ts`）。そのため Firestore への読み書きはセキュリティルールに従う。サーバーからの書き込み（シード）を許可する必要がある一方、ルールを緩めすぎると誰でも書き込めてしまうため、ルール変更時は影響を明示すること。
+- `reactStrictMode: false` は意図的な設定（`next.config.mjs`）。
 - `fetchPokemonData` は日本語データの欠損に対して多段フォールバックを持つ（説明文: ja → ja-Hrkt → 分類から生成、画像: フォルム違いでスプライトがなければ基本フォルムの画像）。
 - 画像は `next/image` で配信し、`next.config.mjs` で raw.githubusercontent.com のみ許可 + 1日キャッシュ。SVG 許可のため CSP を設定している。
 - 一覧はスクロール位置を sessionStorage に保存し、詳細から戻ったとき高さの復元を待ってからスクロール復元する（`HomeClient.tsx`）。
