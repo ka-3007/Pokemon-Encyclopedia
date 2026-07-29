@@ -7,22 +7,22 @@
 - **一覧**: スクロールに応じた追加読み込み（無限スクロール）
 - **検索・フィルタ**: 名前（ひらがなはカタカナに正規化）とタイプで絞り込み
 - **詳細**: 個体ごとの情報（日本語名・図鑑テキスト・タイプ・進化チェーンなど）
-- **データ**: PokeAPI から取得し、Firebase Firestore にキャッシュ。クライアント側では IndexedDB も利用
+- **データ**: PokeAPI から取得し、Firebase Firestore に保存。サーバー側は `unstable_cache`、クライアント側は TanStack Query + IndexedDB 永続化で1日キャッシュ
 
 ## 技術スタック
 
-| 区分           | 使用技術                                       |
-| -------------- | ---------------------------------------------- |
-| フレームワーク | Next.js 14（App Router）、React 18、TypeScript |
-| スタイル       | Tailwind CSS                                   |
-| 状態管理       | Recoil                                         |
-| HTTP           | Axios                                          |
-| BaaS           | Firebase（Firestore、Analytics）               |
-| 外部 API       | PokeAPI                                        |
+| 区分             | 使用技術                                       |
+| ---------------- | ---------------------------------------------- |
+| フレームワーク   | Next.js 14（App Router）、React 18、TypeScript |
+| スタイル         | Tailwind CSS                                   |
+| データ取得・状態 | TanStack Query（IndexedDB への永続化つき）     |
+| HTTP             | Axios                                          |
+| BaaS             | Firebase（Firestore、Analytics）               |
+| 外部 API         | PokeAPI                                        |
 
 ## 前提条件
 
-- [Node.js](https://nodejs.org/)（LTS 推奨）
+- [Node.js](https://nodejs.org/) 24.x
 - npm（同梱）
 
 ## セットアップ
