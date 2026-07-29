@@ -9,8 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "deploy": "npm run build && firebase deploy"
+    "lint": "next lint"
   },
   "dependencies": {
     "@tanstack/query-async-storage-persister": "^5.101.4",
