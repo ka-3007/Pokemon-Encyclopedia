@@ -5,13 +5,14 @@ import PokemonDetail from '@/components/PokemonDetail';
 import { getPokemonDetail, getPokemonDetailWithRelated } from '@/lib/pokemonServer';
 
 type Props = {
-  params: {
+  params: Promise<{
     name: string;
-  };
+  }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const pokemon = await getPokemonDetail(params.name);
+  const { name } = await params;
+  const pokemon = await getPokemonDetail(name);
   if (!pokemon) return {};
 
   return {
@@ -21,7 +22,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function Detail({ params }: Props) {
-  const { pokemonDetail, newPokemonDetails } = await getPokemonDetailWithRelated(params.name);
+  const { name } = await params;
+  const { pokemonDetail, newPokemonDetails } = await getPokemonDetailWithRelated(name);
 
   if (!pokemonDetail) {
     notFound();
