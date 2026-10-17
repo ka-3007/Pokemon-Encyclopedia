@@ -94,7 +94,7 @@ export default function HomeClient({ initialPage }: { initialPage: PokemonPage }
   };
 
   return (
-    <div className="bg-gradient-to-br from-blue-100 to-purple-100 pb-[5rem] pt-[3rem]">
+    <div className="bg-linear-to-br from-blue-100 to-purple-100 pb-20 pt-12">
       <h1 className="text-center text-4xl font-bold text-gray-800 mb-4">ポケモン図鑑</h1>
       <Search onSearch={onSearch} onReset={onReset} />
       <div className="app-container">

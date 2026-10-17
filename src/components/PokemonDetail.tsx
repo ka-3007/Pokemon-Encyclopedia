@@ -27,7 +27,7 @@ const PokemonDetail = ({ pokemon, pokemonDetails }: Props) => {
       : { background: `var(--${pokemon.types[0]})` };
 
   return (
-    <div className="bg-gradient-to-br from-blue-100 to-purple-100 p-4 font-sans">
+    <div className="bg-linear-to-br from-blue-100 to-purple-100 p-4 font-sans">
       <div
         className="flex flex-col md:flex-row w-full max-w-5xl mx-auto rounded-lg overflow-hidden shadow-lg"
         style={backgroundStyle}
@@ -49,7 +49,7 @@ const PokemonDetail = ({ pokemon, pokemonDetails }: Props) => {
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-2 md:mb-3">{pokemon.japaneseName}</h2>
             <h3 className="text-xl md:text-2xl mb-4 md:mb-6">{pokemon.japaneseTypes.join(' / ')}</h3>
-            <p className="text-sm md:text-base mb-6 md:mb-8 bg-white bg-opacity-50 p-4 md:p-6 rounded-lg shadow-inner">
+            <p className="text-sm md:text-base mb-6 md:mb-8 bg-white/50 p-4 md:p-6 rounded-lg shadow-inner">
               {pokemon.description}
             </p>
           </div>

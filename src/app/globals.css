@@ -1,13 +1,73 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
-    'Droid Sans', 'Helvetica Neue', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@theme {
+  --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
+  --background-image-gradient-conic: conic-gradient(
+    from 180deg at 50% 50%,
+    var(--tw-gradient-stops)
+  );
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  /* v4 でボタンの既定カーソルが default に、プレースホルダー色が currentcolor の 50% に変わったため v3 の見た目に戻す */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+
+  /* v4 の preflight はフォーム部品の背景を透明にするため、v3 と同じブラウザ既定の背景に戻す */
+  input,
+  select,
+  textarea {
+    background-color: revert;
+  }
+}
+
+/*
+  v4 では Tailwind のユーティリティが @layer 内に入り、レイヤー外の CSS が詳細度に関係なく優先される。
+  要素セレクタはユーティリティ（mb-4 など）に負けていた v3 の挙動を保つため @layer base に置く。
+*/
+@layer base {
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
+      'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  }
+
+  h3 {
+    margin-bottom: 0.2rem;
+  }
+
+  h4 {
+    margin: 0.2rem;
+  }
 }
 
 /* タイプごとの色変数 */
@@ -30,10 +90,6 @@ body {
   --fire: #fcd6b3; /* ほのお */
   --water: #c7e1f9; /* みず */
   --bug: #f6f9a3; /* むし */
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
 .app-container {
@@ -88,10 +144,6 @@ code {
   }
 }
 
-h3 {
-  margin-bottom: 0.2rem;
-}
-
 .thumb-container .number {
   border-radius: 1rem;
   padding: 0.2rem 0.4rem;
@@ -138,8 +190,7 @@ h3 {
   background-color: rgba(0, 0, 0, 0.185);
 }
 
-.detail-wrapper h3,
-h4 {
+.detail-wrapper h3 {
   margin: 0.2rem;
 }
 

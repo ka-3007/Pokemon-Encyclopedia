@@ -14,7 +14,7 @@
 | 区分             | 使用技術                                       |
 | ---------------- | ---------------------------------------------- |
 | フレームワーク   | Next.js 16（App Router）、React 19、TypeScript |
-| スタイル         | Tailwind CSS                                   |
+| スタイル         | Tailwind CSS v4                                |
 | データ取得・状態 | TanStack Query（IndexedDB への永続化つき）     |
 | HTTP             | Axios                                          |
 | BaaS             | Firebase（Firestore、Analytics）               |

@@ -30,7 +30,7 @@ export default async function Detail({ params }: Props) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen flex flex-col items-center justify-center">
+    <div className="bg-linear-to-br from-blue-100 to-purple-100 min-h-screen flex flex-col items-center justify-center">
       <PokemonDetail pokemon={pokemonDetail} pokemonDetails={newPokemonDetails} />
     </div>
   );
