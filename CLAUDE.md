@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 概要
 
-PokeAPI のデータを日本語表示するポケモン図鑑 Web アプリ。Next.js 14 (App Router) + React 18 + TypeScript + Tailwind CSS。データは PokeAPI → Firestore → 各層キャッシュという流れで配信される。コードコメント・コミットメッセージは日本語。
+PokeAPI のデータを日本語表示するポケモン図鑑 Web アプリ。Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS。データは PokeAPI → Firestore → 各層キャッシュという流れで配信される。コードコメント・コミットメッセージは日本語。
 
 ## コマンド
 
 ```bash
 npm run dev      # 開発サーバー (http://localhost:3000)
 npm run build    # 本番ビルド
-npm run lint     # ESLint (next lint)
+npm run lint     # ESLint (ESLint CLI + eslint.config.mjs)
 ```
 
 - Firebase は Firestore / Analytics のみ利用（Hosting へのデプロイはしていない）。
